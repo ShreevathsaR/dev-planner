@@ -1,0 +1,16 @@
+{
+  "name": "dev-planner",
+  "version": "1.0.0",
+  "private": "true",
+  "description": "",
+  "scripts": {
+    "web":"pnpm --filter web dev",
+    "mobile":"pnpm --filter mobile start",
+    "start":"pnpm --filter web dev & pnpm --filter mobile start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.5.2"
+}
