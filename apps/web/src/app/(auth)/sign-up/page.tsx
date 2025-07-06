@@ -44,10 +44,14 @@ export default function Signup() {
     setIsLoading(true);
 
     try {
+
+      const profilePicture = await fetch(`https://api.dicebear.com/7.x/initials/svg?seed=${name}`)
+
       const response = await authClient.signUp.email({
         email,
         name,
         password,
+        image: profilePicture.url,
       });
 
       if (response.error) {
@@ -57,8 +61,11 @@ export default function Signup() {
       }
 
       if (response.data.token) {
-        router.replace("dashboard");
-        return toast.success("User registered successfully");
+        await authClient.sendVerificationEmail({
+          email,
+          callbackURL: "/dashboard",
+        });
+        return toast.success("Please check your email for verification");
       }
     } catch (error) {
       toast.error("Error signing up");
@@ -170,7 +177,7 @@ export default function Signup() {
       </Card>
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
         Already registered with us? Please{" "}
-        <a href="/signin" className="hover:!text-accent">
+        <a href="/sign-in" className="hover:!text-accent">
           Login
         </a>
         .

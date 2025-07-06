@@ -178,7 +178,7 @@ export default function Signin() {
       </Card>
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
         Not registered with us? Please{" "}
-        <a href="/signup" className="hover:!text-accent">
+        <a href="/sign-up" className="hover:!text-accent">
           Sign up
         </a>
         .
