@@ -76,6 +76,7 @@ export default function Signin() {
     try {
       const response = await authClient.signIn.social({
         provider: "google",
+        callbackURL: "http://localhost:3000/dashboard",
       });
 
       console.log(response);

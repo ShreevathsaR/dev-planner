@@ -34,12 +34,11 @@ export default function SignIn() {
   // }, []);
 
   async function handleLogin() {
-
-    setIsLoading(true)
-    Keyboard.dismiss()
+    setIsLoading(true);
+    Keyboard.dismiss();
     try {
       const response = await authClient.signIn.email({
-        email: "vathsaworks@gmail.com",
+        email: "shreevathsar2002@gmail.com",
         password: "Vathsa@123",
       });
 
@@ -47,98 +46,100 @@ export default function SignIn() {
         return Toast.show({
           type: "error",
           text1: "Sign in failed",
-          text2: response.error.message || '',
+          text2: response.error.message || "",
         });
       }
 
       Toast.show({
-          type: "success",
-          text1: "Success",
-          text2: `Logged in as ${response.data.user.name}` || '',
-        })
+        type: "success",
+        text1: "Success",
+        text2: `Logged in as ${response.data.user.name}` || "",
+      });
 
       console.log(response);
     } catch (error) {
       console.error(error);
-          return Toast.show({
-          type: "error",
-          text1: "Sign in failed"
-        });
+      return Toast.show({
+        type: "error",
+        text1: "Sign in failed",
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
   return (
-    <>
-      <View style={styles.container}>
-        <Toast position="bottom" bottomOffset={30} visibilityTime={2000} />
-        <View style={styles.formContainer}>
-          {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.title}>Welcome back</Text>
-            <Text style={styles.subtitle}>Sign in to your account</Text>
-          </View>
-          {isLoading && <ActivityIndicator size="large" color="white" animating={isLoading}/>}
-          {/* Email Input */}
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your email"
-              placeholderTextColor="#9CA3AF"
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </View>
+    <View style={styles.container}>
+      <Toast position="bottom" bottomOffset={30} visibilityTime={2000} />
+      <View style={styles.formContainer}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Welcome back</Text>
+          <Text style={styles.subtitle}>Sign in to your account</Text>
+        </View>
+        {isLoading && (
+          <ActivityIndicator size="large" color="white" animating={isLoading} />
+        )}
+        {/* Email Input */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your email"
+            placeholderTextColor="#9CA3AF"
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
 
-          {/* Password Input */}
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your password"
-              placeholderTextColor="#9CA3AF"
-              secureTextEntry
-            />
-          </View>
+        {/* Password Input */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your password"
+            placeholderTextColor="#9CA3AF"
+            secureTextEntry
+          />
+        </View>
 
-          {/* Forgot Password */}
-          <TouchableOpacity style={styles.forgotPassword}>
-            <Text style={styles.forgotPasswordText}>Forgot password?</Text>
-          </TouchableOpacity>
+        {/* Forgot Password */}
+        <TouchableOpacity style={styles.forgotPassword}>
+          <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+        </TouchableOpacity>
 
-          {/* Sign In Button */}
-          <TouchableOpacity
-            style={styles.signInButton}
-            onPress={() => handleLogin()}
-            disabled={isLoading}
-          >
-            <Text style={styles.signInButtonText}>{isLoading ? 'Signing in..' : 'Sign In'}</Text>
-          </TouchableOpacity>
+        {/* Sign In Button */}
+        <TouchableOpacity
+          style={styles.signInButton}
+          onPress={() => handleLogin()}
+          disabled={isLoading}
+        >
+          <Text style={styles.signInButtonText}>
+            {isLoading ? "Signing in.." : "Sign In"}
+          </Text>
+        </TouchableOpacity>
 
-          {/* Divider */}
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or</Text>
-            <View style={styles.dividerLine} />
-          </View>
+        {/* Divider */}
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>or</Text>
+          <View style={styles.dividerLine} />
+        </View>
 
-          {/* Google Sign In */}
-          <TouchableOpacity style={styles.googleButton} disabled={isLoading}>
-            <Text style={styles.googleButtonText}>Continue with Google</Text>
-          </TouchableOpacity>
+        {/* Google Sign In */}
+        <TouchableOpacity style={styles.googleButton} disabled={isLoading}>
+          <Text style={styles.googleButtonText}>Continue with Google</Text>
+        </TouchableOpacity>
 
-          {/* Sign Up Link */}
-          <View style={styles.signUpContainer}>
-            <Text style={styles.signUpText}>Don't have an account? </Text>
-            <Link href={"/sign-up"}>
-              <Text style={styles.signUpLink}>Sign up</Text>
-            </Link>
-          </View>
+        {/* Sign Up Link */}
+        <View style={styles.signUpContainer}>
+          <Text style={styles.signUpText}>Don't have an account? </Text>
+          <Link href={"/sign-up"}>
+            <Text style={styles.signUpLink}>Sign up</Text>
+          </Link>
         </View>
       </View>
-    </>
+    </View>
   );
 }
 

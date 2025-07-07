@@ -4,11 +4,13 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Drawer } from "expo-router/drawer";
 import "react-native-reanimated";
-
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Stack } from "expo-router";
+import { authClient } from "@/lib/auth-client";
+import { useEffect, useState } from "react";
+import { Session } from "better-auth";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -16,41 +18,58 @@ export default function RootLayout() {
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
 
-  if (!loaded) {
-    return null;
-  }
+  const [session, setSession] = useState<Session | null>(null);
+  const [isAuthorized, setIsAuthorized] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    async function getSession() {
+      setIsLoading(true);
+      console.log("Getting session...");
+      try {
+        const { data } = await authClient.getSession();
+        if (data) {
+          setSession(data?.session);
+          setIsAuthorized(true);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    getSession();
+  }, []);
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <Drawer
-          screenOptions={{
-            drawerActiveTintColor: "gray",
-          }}
-        >
-          <Drawer.Screen
-            name="sign-in"
-            options={{
-              drawerLabel: "SignIn Screen",
-              headerTitle: "SignIn",
-            }}
-          />
-          <Drawer.Screen
+        <Stack screenOptions={{
+          headerShown: false,
+          animation: "none",
+        }}>
+          <Stack.Protected guard={isAuthorized}>
+            <Stack.Screen
+              name="stacks/authorized"
+              options={{
+                title: "Authorized",
+              }}
+            />
+          </Stack.Protected>
+          <Stack.Protected guard={!isAuthorized}>
+          <Stack.Screen
             name="sign-up"
             options={{
-              drawerLabel: "SignUp Screen",
-              headerTitle: "SignUp",
+              title: "Sign-Up",
             }}
           />
-          <Drawer.Screen
-            name="+not-found"
+          <Stack.Screen
+            name="sign-in"
             options={{
-              drawerLabel: "Not Found Screen",
-              headerTitle: "Not Found 404",
+              title: "Sign-In",
             }}
           />
-        </Drawer>
-      </GestureHandlerRootView>
+          </Stack.Protected>
+        </Stack>
     </ThemeProvider>
   );
 }

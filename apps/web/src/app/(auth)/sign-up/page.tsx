@@ -54,13 +54,14 @@ export default function Signup() {
         image: profilePicture.url,
       });
 
+      console.log(response);
       if (response.error) {
         return toast.error("Signup failed", {
           description: response.error.message,
         });
       }
 
-      if (response.data.token) {
+      if (response.data.user) {
         await authClient.sendVerificationEmail({
           email,
           callbackURL: "/dashboard",
