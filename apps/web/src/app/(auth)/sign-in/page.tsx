@@ -20,15 +20,20 @@ import { signInSchema, SignInFormType } from "@dev-planner/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { authClient } from "@/lib/auth-client";
 import * as z from "zod";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { auth } from "@/lib/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, getAuth } from "firebase/auth";
+
 
 export default function Signin() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const auth = getAuth();
+  const provider = new GoogleAuthProvider();
 
   const form = useForm({
     resolver: zodResolver(signInSchema),
@@ -43,23 +48,20 @@ export default function Signin() {
     setIsLoading(true);
 
     try {
-      const response = await authClient.signIn.email({
-        email,
-        password,
-      });
+      const response = await signInWithEmailAndPassword(auth, email, password);
 
       console.log(response);
 
-      if (response.error) {
-        return toast.error("Signin failed", {
-          description: response.error.message,
-        });
-      }
+      // if (response) {
+      //   return toast.error("Signin failed", {
+      //     description: response.error.message,
+      //   });
+      // }
 
-      if (response.data.token) {
-        router.replace("dashboard");
-        return toast.success("User logged-in successfully");
-      }
+      // if (response.data.token) {
+      //   router.replace("dashboard");
+      //   return toast.success("User logged-in successfully");
+      // }
 
       console.log(response);
     } catch (error) {
@@ -70,30 +72,49 @@ export default function Signin() {
     }
   }
 
-  async function handleGoogleSignIn() {
+  // const handleGoogleSignIn = async () => {
+  //   setIsLoading(true);
+
+  //   try {
+  //     const response = await authClient.signIn.social({
+  //       provider: "google",
+  //       callbackURL: "http://localhost:3000/dashboard",
+  //     });
+
+  //     console.log(response);
+  //   } catch (error) {
+  //     toast.error("Error signing up with google");
+  //     console.log(error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
+
+  const handleGoogleSignIn = async () => {
     setIsLoading(true);
-
     try {
-      const response = await authClient.signIn.social({
-        provider: "google",
-        callbackURL: "http://localhost:3000/dashboard",
-      });
 
-      console.log(response);
+      const response = await signInWithPopup(auth, provider);
+
+      console.log('User',response.user);
+
+      const credential = GoogleAuthProvider.credentialFromResult(response);
+
+      console.log('AccessToken',credential?.accessToken);
     } catch (error) {
       toast.error("Error signing up with google");
       console.log(error);
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex bg-foreground flex-col min-h-screen justify-center gap-6">
       <Card className="w-100 self-center bg-secondary-background border-white/20 border-1">
         <CardHeader className="text-center">
           <CardTitle className="text-xl text-accent">Welcome</CardTitle>
-          <CardDescription>Signup with your Google account</CardDescription>
+          <CardDescription>Login with your email and password</CardDescription>
         </CardHeader>
         <CardContent>
           <Button

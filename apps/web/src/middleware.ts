@@ -3,7 +3,7 @@ import { getSessionCookie } from "better-auth/cookies";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const publicRoutes = ["/sign-in", "/sign-up",'/'];
+  const publicRoutes = ["/sign-in", "/sign-up", "/", "/auth/verify/callback"];
   const sessionCookie = getSessionCookie(request);
 
   if (sessionCookie && publicRoutes.includes(pathname)) {

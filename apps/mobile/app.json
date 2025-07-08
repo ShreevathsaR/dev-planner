@@ -12,6 +12,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.devplanner",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -33,7 +34,10 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      ["@react-native-google-signin/google-signin",{
+        "webClientId": "710907599444-tulnu86m0um0s0g2gffb090v07u7jp6d.apps.googleusercontent.com"
+      }]
     ],
     "experiments": {
       "typedRoutes": true

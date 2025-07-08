@@ -16,6 +16,8 @@ config.resolver.nodeModulesPaths = [
   path.resolve(monorepoRoot, 'node_modules'),
 ];
 
-config.resolver.unstable_enablePackageExports = true;
+config.resolver.sourceExts.push('cjs');
+
+config.resolver.unstable_enablePackageExports = false;
 
 module.exports = config

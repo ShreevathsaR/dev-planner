@@ -7,66 +7,97 @@ import {
   StyleSheet,
   ActivityIndicator,
   Keyboard,
+  Alert,
 } from "react-native";
-import { authClient } from "@/lib/auth-client";
 import { Link } from "expo-router";
 import Toast from "react-native-toast-message";
+import { useAuth } from "@/lib/authContext";
+import { auth } from "@/firebaseConfig";
+import { getAuth, GoogleAuthProvider, signInWithCredential, signInWithEmailAndPassword, signInWithRedirect } from "firebase/auth";
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 export default function SignIn() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("vathsaworks@gmail.com");
+  const [password, setPassword] = useState("Vathsa@123");
   const [isLoading, setIsLoading] = useState(false);
+  const { setIsAuthorized } = useAuth();
+  const auth = getAuth();
 
-  // useEffect(() => {
-  //   const getSession = async () => {
+  // async function handleLogin() {
+  //   setIsLoading(true);
+  //   Keyboard.dismiss();
   //   try {
-  //       const response = await authClient.signIn.email({
-  //           email: "vathsaworks@gmail.com",
-  //           password: "Vathsa@123",
-  //       })
-  //       setMessage(JSON.stringify(response));
-  //       console.log(response);
+  //     const response = await authClient.signIn.email({
+  //       email: "vathsaworks@gmail.com",
+  //       password: "Vathsa@123",
+  //     });
+
+  //     if (response.error) {
+  //       return Toast.show({
+  //         type: "error",
+  //         text1: "Sign in failed",
+  //         text2: response.error.message || "",
+  //       });
+  //     }
+
+  //     Toast.show({
+  //       type: "success",
+  //       text1: "Success",
+  //       text2: `Logged in as ${response.data.user.name}` || "",
+  //     });
+  //     console.log(response);
+  //     setIsAuthorized(true);
   //   } catch (error) {
-  //       setMessage(JSON.stringify(error));
+  //     console.error(error);
+  //     return Toast.show({
+  //       type: "error",
+  //       text1: "Sign in failed",
+  //     });
+  //   } finally {
+  //     setIsLoading(false);
   //   }
-  //   };
-  //   getSession();
-  // }, []);
+  // }
+  // const handleGoogleSignIn = async () => {
+  //   setIsLoading(true);
 
-  async function handleLogin() {
+  //   try {
+  //     const response = await authClient.signIn.social({
+  //       provider: "googleMobile",
+  //       callbackURL: "devplanner://auth/callback",
+  //     });
+  //     console.log(response);
+  //   } catch (error) {
+  //     // toast.error("Error signing up with google");
+  //     console.log(error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
+
+  const handleLogin = async () => {
     setIsLoading(true);
-    Keyboard.dismiss();
     try {
-      const response = await authClient.signIn.email({
-        email: "shreevathsar2002@gmail.com",
-        password: "Vathsa@123",
-      });
-
-      if (response.error) {
-        return Toast.show({
-          type: "error",
-          text1: "Sign in failed",
-          text2: response.error.message || "",
-        });
-      }
-
-      Toast.show({
-        type: "success",
-        text1: "Success",
-        text2: `Logged in as ${response.data.user.name}` || "",
-      });
-
+      const response = await signInWithEmailAndPassword(auth, email, password);
       console.log(response);
     } catch (error) {
       console.error(error);
-      return Toast.show({
-        type: "error",
-        text1: "Sign in failed",
-      });
     } finally {
       setIsLoading(false);
     }
   }
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const { data } = await GoogleSignin.signIn();
+      const googleCredential = GoogleAuthProvider.credential(data?.idToken);
+      await signInWithCredential(auth, googleCredential);
+      // await syncUser(); // Sync with Prisma
+    } catch (error) {
+      Alert.alert('Google login error', error as string);
+    }
+  };
+
 
   return (
     <View style={styles.container}>
@@ -127,7 +158,9 @@ export default function SignIn() {
         </View>
 
         {/* Google Sign In */}
-        <TouchableOpacity style={styles.googleButton} disabled={isLoading}>
+        <TouchableOpacity style={styles.googleButton} 
+        onPress={() => handleGoogleSignIn()}
+         disabled={isLoading}>
           <Text style={styles.googleButtonText}>Continue with Google</Text>
         </TouchableOpacity>
 

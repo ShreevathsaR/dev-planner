@@ -6,7 +6,6 @@ import {
   Text,
   StyleSheet,
 } from "react-native";
-import { authClient } from "@/lib/auth-client";
 import { HelloWave } from "@/components/HelloWave";
 import { Link } from 'expo-router'
 
@@ -31,21 +30,21 @@ export default function SignUp() {
   //   getSession();
   // }, []);
 
-  async function handleSignUp() {
-    console.log("hi signing up now");
-    try {
-      const response = await authClient.signUp.email({
-        name: "Shreevathsa",
-        email: "vathsaworks@gmail.com",
-        password: "Vathsa@123",
-      });
-      setMessage(JSON.stringify(response));
-      console.log(response);
-    } catch (error) {
-      console.error(error);
-      setMessage(JSON.stringify(error));
-    }
-  }
+  // async function handleSignUp() {
+  //   console.log("hi signing up now");
+  //   try {
+  //     const response = await authClient.signUp.email({
+  //       name: "Shreevathsa",
+  //       email: "vathsaworks@gmail.com",
+  //       password: "Vathsa@123",
+  //     });
+  //     setMessage(JSON.stringify(response));
+  //     console.log(response);
+  //   } catch (error) {
+  //     console.error(error);
+  //     setMessage(JSON.stringify(error));
+  //   }
+  // }
 
   return (
     <View style={styles.container}>
@@ -97,7 +96,7 @@ export default function SignUp() {
         {/* Sign In Button */}
         <TouchableOpacity
           style={styles.signInButton}
-          onPress={() => handleSignUp()}
+          // onPress={() => handleSignUp()}
         >
           <Text style={styles.signInButtonText}>Sign Up</Text>
         </TouchableOpacity>

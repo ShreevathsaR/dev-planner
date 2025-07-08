@@ -1,4 +1,4 @@
-import { authClient } from "@/lib/auth-client";
+import { useAuth } from "@/lib/authContext";
 import { useRouter } from "expo-router";
 import React, { Component } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
@@ -6,18 +6,20 @@ import { Text, TouchableOpacity, View } from "react-native";
 const Root = () => {
 
   const router = useRouter();
+  const { setIsAuthorized } = useAuth();
 
-  const handleSignOut = async() => {
-    try {
-        const response = await authClient.signOut()
-        if(response.data?.success){
-            router.replace('/sign-in')
-        }
-        console.log(response)
-    } catch (error) {
-        console.error(error)
-    }
-}
+//   const handleSignOut = async() => {
+//     try {
+//         const response = await authClient.signOut()
+//         if(response.data?.success){
+//             setIsAuthorized(false);
+//             // router.replace('/sign-in')
+//         }
+//         console.log(response)
+//     } catch (error) {
+//         console.error(error)
+//     }
+// }
 
   return (
       <View
@@ -31,7 +33,7 @@ const Root = () => {
         <Text style={{ color: "white", fontSize: 32 }}>
           Authorized stacks here
         </Text>
-        <TouchableOpacity onPress={() => handleSignOut()}>
+        <TouchableOpacity >
           <Text style={{ color: "white" }}>Sign out</Text>
         </TouchableOpacity>
       </View>
