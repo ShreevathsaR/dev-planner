@@ -1,18 +1,22 @@
-import { createContext, Dispatch, SetStateAction, useContext } from "react";
-
-export const AuthContext = createContext<AuthContextType | null>(null);
+import { createContext, useContext } from 'react';
+import { User } from 'firebase/auth';
 
 interface AuthContextType {
-  isAuthorized: boolean;
-  setIsAuthorized: Dispatch<SetStateAction<boolean>>;
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading?: boolean;
 }
 
-//providers in root _layout.tsx
+export const AuthContext = createContext<AuthContextType>({
+  user: null,
+  isAuthenticated: false,
+  isLoading: true,
+});
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };

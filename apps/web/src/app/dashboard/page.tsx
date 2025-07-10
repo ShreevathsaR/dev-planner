@@ -1,25 +1,30 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth-client";
+import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
+import { signOut } from "firebase/auth";
+import { deleteCookie } from "@/lib/setSession";
 
 const page = () => {
   const router = useRouter();
 
-  const signOut = async () => {
-    const response = await authClient.signOut();
-    if (response.data?.success) {
-      router.push("/sign-in");
-    }
+  const handleSignOut = async () => {
+    console.log("Signing out");
+    await signOut(auth);
+    await deleteCookie();
+    router.push("/sign-in");
   };
 
+
   return (
-    <div>
-      Dashboard
+    <div className="flex flex-col items-center justify-center h-screen gap-4 bg-black text-white">
+      <h3 className="text-4xl font-bold">Dashboard</h3>
       <Button
-        onClick={() => {
-          signOut();
+        style={{
+          backgroundColor: "white",
+          color: "black",
         }}
+        onClick={handleSignOut}
       >
         Sign Out
       </Button>

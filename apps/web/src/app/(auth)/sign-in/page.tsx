@@ -25,14 +25,16 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { GoogleAuthProvider, signInWithPopup, getAuth } from "firebase/auth";
-
+import {
+  sendEmailVerification,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { setSession } from "@/lib/setSession";
 
 export default function Signin() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const auth = getAuth();
   const provider = new GoogleAuthProvider();
 
   const form = useForm({
@@ -52,58 +54,83 @@ export default function Signin() {
 
       console.log(response);
 
-      // if (response) {
-      //   return toast.error("Signin failed", {
-      //     description: response.error.message,
-      //   });
-      // }
+      if (!response.user) {
+        return toast.error("Login failed", {
+          description: "Login failed please try again",
+        });
+      }
 
-      // if (response.data.token) {
-      //   router.replace("dashboard");
-      //   return toast.success("User logged-in successfully");
-      // }
+      if (!response.user.emailVerified) {
+        await sendEmailVerification(response.user);
+        return toast.error("Your email is not verified", {
+          description: "Please check your email for verification",
+        });
+      }
 
-      console.log(response);
-    } catch (error) {
-      toast.error("Error signing up");
-      console.log(error);
+      const token = await response.user.getIdToken();
+      await setSession(token);
+
+      //TODO:Save user details in context
+      router.replace("dashboard");
+      return toast.success("User logged-in successfully");
+    } catch (error: any) {
+      let errorMessage = error.code;
+
+      switch (error.code) {
+        case "auth/invalid-credential":
+          errorMessage = "Invalid credentials";
+          break;
+        case "auth/user-not-found":
+          errorMessage = "User not found";
+          break;
+        case "auth/wrong-password":
+          errorMessage = "Wrong password";
+          break;
+      }
+
+      toast.error("Error signing up", {
+        description: errorMessage,
+      });
     } finally {
       setIsLoading(false);
     }
   }
 
-  // const handleGoogleSignIn = async () => {
-  //   setIsLoading(true);
-
-  //   try {
-  //     const response = await authClient.signIn.social({
-  //       provider: "google",
-  //       callbackURL: "http://localhost:3000/dashboard",
-  //     });
-
-  //     console.log(response);
-  //   } catch (error) {
-  //     toast.error("Error signing up with google");
-  //     console.log(error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // }
-
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-
       const response = await signInWithPopup(auth, provider);
 
-      console.log('User',response.user);
+      console.log("User", response.user);
 
       const credential = GoogleAuthProvider.credentialFromResult(response);
+      console.log("AccessToken", credential?.accessToken);
 
-      console.log('AccessToken',credential?.accessToken);
-    } catch (error) {
-      toast.error("Error signing up with google");
-      console.log(error);
+      const token = await response.user.getIdToken();
+      await setSession(token);
+    } catch (error: any) {
+      let errorMessage = "An error occurred during Google login";
+
+      if (error.code) {
+        switch (error.code) {
+          case "auth/popup-closed-by-user":
+            errorMessage = "Google Sign-In was cancelled";
+            break;
+          case "auth/cancelled-popup-request":
+            errorMessage = "Google Sign-In was cancelled";
+            break;
+          case "auth/popup-blocked":
+            errorMessage = "Google Sign-In was blocked";
+            break;
+          case "auth/popup-blocked":
+            errorMessage = "Google Sign-In was blocked";
+            break;
+        }
+      }
+
+      toast.error("Error signing", {
+        description: errorMessage,
+      });
     } finally {
       setIsLoading(false);
     }

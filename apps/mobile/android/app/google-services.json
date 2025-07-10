@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "710907599444",
+    "project_id": "dev-pla",
+    "storage_bucket": "dev-pla.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:710907599444:android:9cb6717db518643ba9ebc1",
+        "android_client_info": {
+          "package_name": "com.devplanner"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "710907599444-qloev77nnn92me1cmteakkqo2bekucuk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.devplanner",
+            "certificate_hash": "00ed51faaf2c5f17f339d6cb45cc5d5abba7d275"
+          }
+        },
+        {
+          "client_id": "710907599444-tulnu86m0um0s0g2gffb090v07u7jp6d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWsE0B9Fg57-FABkUnSC4512-BDlTCuN8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "710907599444-tulnu86m0um0s0g2gffb090v07u7jp6d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

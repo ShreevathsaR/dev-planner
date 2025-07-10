@@ -4,18 +4,25 @@
     "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/logo.png",
     "scheme": "devplanner",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "white"
+    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.devplanner"
     },
     "android": {
       "package": "com.devplanner",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/images/logo.png",
+        "backgroundColor": "white"
       },
       "edgeToEdgeEnabled": true
     },
@@ -35,12 +42,22 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      ["@react-native-google-signin/google-signin",{
-        "webClientId": "710907599444-tulnu86m0um0s0g2gffb090v07u7jp6d.apps.googleusercontent.com"
-      }]
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "webClientId": "710907599444-tulnu86m0um0s0g2gffb090v07u7jp6d.apps.googleusercontent.com",
+          "iosUrlScheme": "com.googleusercontent.apps.710907599444-tulnu86m0um0s0g2gffb090v07u7jp6d"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "af60fe9b-975e-47cb-8196-fe703101a1ef"
+      }
     }
   }
 }

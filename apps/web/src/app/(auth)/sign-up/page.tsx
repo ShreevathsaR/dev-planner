@@ -24,10 +24,20 @@ import * as z from "zod";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import {
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  sendEmailVerification,
+  signInWithPopup,
+  updateProfile,
+} from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { setSession } from "@/lib/setSession";
 
 export default function Signup() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const provider = new GoogleAuthProvider();
 
   const form = useForm({
     resolver: zodResolver(signUpSchema),
@@ -38,66 +48,118 @@ export default function Signup() {
     },
   });
 
-  // async function onSubmit(data: z.infer<SignUpFormType>) {
-  //   const { email, name, password } = data;
-  //   setIsLoading(true);
+  async function onSubmit(data: z.infer<SignUpFormType>) {
+    const { email, name, password } = data;
+    setIsLoading(true);
 
-  //   try {
+    try {
+      const profilePicture = await fetch(
+        `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
+          name
+        )}`
+      );
+      const response = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
 
-  //     const profilePicture = await fetch(`https://api.dicebear.com/7.x/initials/svg?seed=${name}`)
+      if (!response.user) {
+        return toast.error("Signup failed", {
+          description: "Please try again",
+        });
+      }
 
-  //     const response = await authClient.signUp.email({
-  //       email,
-  //       name,
-  //       password,
-  //       image: profilePicture.url,
-  //     });
+      await updateProfile(response.user, {
+        displayName: name,
+        photoURL: profilePicture.url,
+      });
+      await sendEmailVerification(response.user);
 
-  //     console.log(response);
-  //     if (response.error) {
-  //       return toast.error("Signup failed", {
-  //         description: response.error.message,
-  //       });
-  //     }
+      //TODO: Save user profile details in database
 
-  //     if (response.data.user) {
-  //       return toast.success("Please check your email for verification");
-  //     }
-  //   } catch (error) {
-  //     toast.error("Error signing up");
-  //     console.log(error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // }
+      return toast.success("Please check your email for verification");
+    } catch (error: any) {
+      let errorMessage = error.code;
+      switch (error.code) {
+        case "auth/popup-closed-by-user":
+          errorMessage = "Google Sign-In was cancelled";
+          break;
+        case "auth/email-already-in-use":
+          errorMessage = "Email already in use";
+          break;
+        case "auth/invalid-email":
+          errorMessage = "Invalid email";
+          break;
+        case "auth/weak-password":
+          errorMessage = "Weak password";
+          break;
+        default:
+          errorMessage = "An unknown error occurred";
+      }
 
-  // const handleGoogleSignIn = async () => {
-  //   setIsLoading(true);
+      toast.error("Error signing up", {
+        description: errorMessage,
+      });
+      console.log(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
-  //   try {
-  //     const response = await authClient.signIn.social({
-  //       provider: "google",
-  //       callbackURL: "http://localhost:3000/dashboard",
-  //     });
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    try {
+      const response = await signInWithPopup(auth, provider);
 
-  //     console.log(response);
-  //   } catch (error) {
-  //     toast.error("Error signing up with google");
-  //     console.log(error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // }
+      console.log("User", response.user);
+
+      const credential = GoogleAuthProvider.credentialFromResult(response);
+
+      console.log("AccessToken", credential?.accessToken);
+
+      const token = await response.user.getIdToken();
+      await setSession(token);
+      router.replace("dashboard");
+    } catch (error: any) {
+      let errorMessage = "An error occurred during Google login";
+
+      if (error.code) {
+        switch (error.code) {
+          case "auth/popup-closed-by-user":
+            errorMessage = "Google Sign-In was cancelled";
+            break;
+          case "auth/cancelled-popup-request":
+            errorMessage = "Google Sign-In was cancelled";
+            break;
+          case "auth/popup-blocked":
+            errorMessage = "Google Sign-In was blocked";
+            break;
+          case "auth/popup-blocked":
+            errorMessage = "Google Sign-In was blocked";
+            break;
+        }
+      }
+
+      toast.error("Error signing", {
+        description: errorMessage,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="flex bg-foreground flex-col min-h-screen justify-center gap-6">
       <Card className="w-100 self-center bg-secondary-background border-white/20 border-1">
         <CardHeader className="text-center">
           <CardTitle className="text-xl text-accent">Welcome</CardTitle>
-          <CardDescription>Register with your email and password</CardDescription>
+          <CardDescription>
+            Register with your email and password
+          </CardDescription>
         </CardHeader>
         <CardContent>
-        {/* <Button
+          <Button
             disabled={isLoading}
             onClick={() => handleGoogleSignIn()}
             variant="outline"
@@ -114,15 +176,15 @@ export default function Signup() {
               </svg>
             )}
             {isLoading ? "Please wait..." : "Login with Google"}
-          </Button> */}
-          {/* <div className="after:border-white/20 mb-5 relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
+          </Button>
+          <div className="after:border-white/20 mb-5 relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
             <span className="bg-foreground text-accent relative z-10 px-2">
               Or continue with
             </span>
-          </div> */}
+          </div>
           <Form {...form}>
             <form
-              // onSubmit={form.handleSubmit(onSubmit)}
+              onSubmit={form.handleSubmit(onSubmit)}
               className="space-y-8 flex flex-col"
             >
               <FormField
