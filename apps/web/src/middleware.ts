@@ -1,34 +1,33 @@
-// middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+const publicPaths = ['/', '/sign-in', '/sign-up', '/api/verify-token'];
+
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const isPublicPath = publicPaths.includes(pathname);
   const sessionToken = request.cookies.get('devplanner.session')?.value;
-  const publicPaths = ['/login', '/signup', '/'];
-  const isPublicPath = publicPaths.includes(request.nextUrl.pathname);
 
-  // Public path handling
-  if (isPublicPath) {
-    if (sessionToken) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-    return NextResponse.next();
-  }
-
-  // Protected path handling
   if (!sessionToken) {
+    if (isPublicPath) {
+      return NextResponse.next();
+    }
     return NextResponse.redirect(new URL('/sign-in', request.url));
   }
 
-  // Verify token via API route
+  if(sessionToken && isPublicPath) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
   try {
-    const verifyResponse = await fetch(new URL('/api/verify-token', request.url), {
+    const verifyUrl = new URL('/api/verify-token', request.url);
+    const verifyResponse = await fetch(verifyUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token: sessionToken }),
     });
+
+    if (!verifyResponse.ok) throw new Error('Invalid token');
 
     const { success } = await verifyResponse.json();
     
@@ -48,6 +47,13 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - api/auth (auth API routes)
+     */
+    '/((?!api|_next/static|_next/image|.*\\.png$).*)',
   ],
 };

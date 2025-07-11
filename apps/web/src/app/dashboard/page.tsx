@@ -4,6 +4,9 @@ import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { deleteCookie } from "@/lib/setSession";
+import { trpcClient } from "@dev-planner/trpc";
+import { httpBatchLink } from "@trpc/client";
+import { useState } from "react";
 
 const page = () => {
   const router = useRouter();
@@ -14,6 +17,14 @@ const page = () => {
     await deleteCookie();
     router.push("/sign-in");
   };
+
+  const [trpcclient] = useState(trpcClient.createClient({
+    links: [
+      httpBatchLink({
+        url: "http://localhost:3000/api/trpc",
+      }),
+    ],
+  }));
 
 
   return (

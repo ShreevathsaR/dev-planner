@@ -11,6 +11,7 @@ export const signUpSchema = z.object({
     .max(20, "Username must contain less that 20 characters")
     .regex(/^[a-zA-Z0-9_]+$/, "Username must not contain special characters"),
   image: z.string().url({ message: "Invalid image url" }).optional(),
+  id: z.string().optional(),
 });
 
 export type SignUpFormType = typeof signUpSchema

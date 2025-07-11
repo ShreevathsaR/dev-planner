@@ -31,6 +31,7 @@ import {
 } from "firebase/auth";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { setSession } from "@/lib/setSession";
+import { trpcClient } from "@dev-planner/trpc";
 
 export default function Signin() {
   const [isLoading, setIsLoading] = useState(false);
@@ -108,6 +109,8 @@ export default function Signin() {
 
       const token = await response.user.getIdToken();
       await setSession(token);
+      router.replace("/dashboard");
+      return toast.success("Logged-in successfully");
     } catch (error: any) {
       let errorMessage = "An error occurred during Google login";
 

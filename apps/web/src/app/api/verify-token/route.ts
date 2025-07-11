@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest, res:NextResponse) {
   const { token } = await req.json();
-//   console.log("Token", token);
+  console.log("Verifying Token....");
   try {
     const decodedToken = await adminAuth.verifyIdToken(token);
     return NextResponse.json(
