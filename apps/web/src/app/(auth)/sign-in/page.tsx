@@ -30,7 +30,7 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { setSession } from "@/lib/setSession";
-import { trpcClient } from "@dev-planner/trpc";
+import { trpcReact } from "@dev-planner/trpc";
 import { handleGoogleSignIn } from "@/lib/services/googleSignIn";
 
 export default function Signin() {
@@ -38,14 +38,14 @@ export default function Signin() {
   const [token, setToken] = useState("");
   const router = useRouter();
 
-  const registerUserMutation = (trpcClient.user as any).registerUser.useMutation({
+  const registerUserMutation = trpcReact.user.registerUser.useMutation({
     onSuccess: async () => {
       await setSession(token);
       router.replace("/dashboard");
       setIsLoading(false);
       return toast.success("Logged-in successfully");
     },
-    onError: async (error: any) => {
+    onError: async (error) => {
       console.log(error)
       if (error.data?.code === "CONFLICT") {
         await setSession(token);

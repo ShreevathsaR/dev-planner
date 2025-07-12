@@ -1,7 +1,6 @@
 import * as z from "zod";
 import { prisma, Prisma } from "@dev-planner/prisma";
-import { TRPCError } from "@trpc/server";
-import { procedure, router } from "../trpc";
+import { TRPCError, procedure, router } from "../trpc";
 
 export const userRouter = router({
   registerUser: procedure
