@@ -4,15 +4,15 @@
   "description": "",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
     "./server": {
-      "types": "./dist/server/router.d.ts",
-      "import": "./dist/server/router.js",
-      "require": "./dist/server/router.js"
+      "types": "./dist/server/index.d.ts",
+      "import": "./dist/server/index.js"
     }
   },
   "files": [

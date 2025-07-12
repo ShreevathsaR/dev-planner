@@ -1,2 +1,2 @@
-export * from "./client";
+export { trpcClient } from "./client";
 export type { AppRouter } from "./server/router";
