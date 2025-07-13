@@ -1,23 +1,28 @@
 import {
   DrawerContentComponentProps,
   DrawerContentScrollView,
+  DrawerItem,
   DrawerItemList,
 } from "@react-navigation/drawer";
-import { useNavigation, useRouter } from "expo-router";
+import {
+  Link,
+  router,
+  useNavigation,
+  usePathname,
+  useSegments,
+} from "expo-router";
 import Drawer from "expo-router/drawer";
-import { Text, TouchableOpacity, View } from "react-native";
 import { signOut } from "firebase/auth";
+import { Button, FlatList, Text, TouchableOpacity, View } from "react-native";
 import { auth } from "../_layout";
-import { useAuth } from "@/lib/authContext";
-import FeatherIcon from "@expo/vector-icons/Feather";
-import { DrawerActions } from "@react-navigation/native";
 import { Image } from "expo-image";
+import { useAuth } from "@/lib/hooks/useAuth";
+import { projects } from "@/lib/sample";
+import Feather from "@expo/vector-icons/Feather";
 
-export default function AppLayout() {
-  const router = useRouter();
+export default function DrawerLayout() {
   const { user } = useAuth();
-
-  const navigation = useNavigation();
+  const pathname = usePathname();
 
   const handleSignOut = async () => {
     try {
@@ -26,6 +31,8 @@ export default function AppLayout() {
       console.error("Error signing out:", error);
     }
   };
+
+  const navigation = useNavigation();
 
   const CustomDrawerContent = (props: DrawerContentComponentProps) => {
     return (
@@ -63,8 +70,8 @@ export default function AppLayout() {
                 Projects
               </Text>
             </View>
-            <TouchableOpacity
-              onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
+            {/* <TouchableOpacity
+              onPress={() => toggleDrawer(navigation)}
             >
               <Text
                 style={{
@@ -79,9 +86,59 @@ export default function AppLayout() {
               >
                 <FeatherIcon name="chevrons-left" size={24} color="white" />
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
-          <DrawerItemList {...props} />
+          {/* <DrawerItemList {...props} /> */}
+
+          {projects.length > 0 ? (
+            projects.map((item) => {
+              return (
+                <DrawerItem
+                  activeTintColor="white"
+                  focused={pathname === `/${item.id}`}
+                  style={{ borderRadius: 10, marginBottom: 5 }}
+                  inactiveTintColor="white"
+                  activeBackgroundColor="#242424"
+                  labelStyle={{ color: "white" }}
+                  key={item.id}
+                  label={`Project ${item.name}`}
+                  onPress={() => {
+                    router.push(`/${item.id}`);
+                  }}
+                  {...props}
+                />
+              );
+            })
+          ) : (
+            <View
+              style={{
+                padding: 10,
+                backgroundColor: "black",
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
+              <Text style={{ color: "lightgray" }}>No projects found</Text>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: "lightgray",
+                  borderWidth: 1,
+                  borderColor: "gray",
+                  padding: 10,
+                  borderRadius: 10,
+                  flexDirection: "row",
+                  gap: 7,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Feather name="plus" size={24} color="black" />
+                <Text style={{fontWeight:'bold'}}>Create Project</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
         <View
           style={{
@@ -104,7 +161,7 @@ export default function AppLayout() {
             >
               <Image
                 source={user?.photoURL}
-                style={{ width: 40, height: 40, borderRadius: 20}}
+                style={{ width: 40, height: 40, borderRadius: 20 }}
               />
               <Text style={{ color: "white", fontWeight: "bold" }}>
                 {user?.displayName}
@@ -132,48 +189,34 @@ export default function AppLayout() {
   };
 
   return (
-    <Drawer
-      drawerContent={(props) => <CustomDrawerContent {...props} />}
-      screenOptions={{
-        drawerItemStyle: {
-          borderRadius: 5,
-        },
-        drawerInactiveBackgroundColor: "black",
-        drawerActiveBackgroundColor: "#242424",
-        drawerActiveTintColor: "white",
-        drawerInactiveTintColor: "white",
-        drawerLabelStyle: {
-          fontSize: 16,
-          fontWeight: 400,
-        },
-        drawerStyle: {
-          borderRightWidth: 1,
-          borderRightColor: "#242424",
-          width: 360,
-        },
-        headerShown: true,
-        headerStyle: {
-          backgroundColor: "black",
-        },
-        headerTintColor: "white",
-      }}
-    >
-      <Drawer.Screen
-        name="index"
-        options={{ title: "Home", drawerLabel: "Home" }}
-      />
-      <Drawer.Screen
-        name="project1"
-        options={{ title: "Project 1", drawerLabel: "Project 1" }}
-      />
-      <Drawer.Screen
-        name="project2"
-        options={{ title: "Project 2", drawerLabel: "Project 2" }}
-      />
-      <Drawer.Screen
-        name="project3"
-        options={{ title: "Project 3", drawerLabel: "Project 3" }}
-      />
-    </Drawer>
+    <View style={{ flex: 1, backgroundColor: "black" }}>
+      <Drawer
+        drawerContent={(props) => <CustomDrawerContent {...props} />}
+        screenOptions={{
+          drawerItemStyle: {
+            borderRadius: 5,
+          },
+          headerShown: true,
+          drawerInactiveBackgroundColor: "black",
+          drawerActiveBackgroundColor: "#242424",
+          drawerActiveTintColor: "white",
+          drawerInactiveTintColor: "white",
+          drawerLabelStyle: {
+            fontSize: 16,
+            fontWeight: 400,
+            color: "white",
+          },
+          drawerStyle: {
+            borderRightWidth: 1,
+            borderRightColor: "#242424",
+            width: 360,
+          },
+          headerStyle: {
+            backgroundColor: "black",
+          },
+          headerTintColor: "white",
+        }}
+      ></Drawer>
+    </View>
   );
 }

@@ -14,7 +14,6 @@ import {
   updateCurrentUser,
   updateProfile,
 } from "firebase/auth";
-import { auth } from "../_layout";
 import { Link, router } from "expo-router";
 import Toast from "react-native-toast-message";
 import { HelloWave } from "@/components/HelloWave";
@@ -24,6 +23,8 @@ import { z } from "zod";
 import { signUpSchema } from "@dev-planner/schema";
 import { handleGoogleSignIn } from "@/lib/auth/googleSignIn";
 import { trpcReact } from "@dev-planner/trpc";
+import { getErrorMessage } from "@/lib/auth/errorMessages";
+import { auth } from "../_layout";
 
 export default function SignUp() {
   const [isLoading, setIsLoading] = useState(false);
@@ -52,6 +53,7 @@ export default function SignUp() {
             text2: "Please check your email to verify your account.",
           });
         }
+        return
       } else {
         setIsLoading(false);
         return Toast.show({
@@ -75,90 +77,60 @@ export default function SignUp() {
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
-    console.log("Submitting data", data);
-    const { name: username, email, password } = data;
-    if (!email || !password || !username) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please fill in all fields",
-      });
-      return;
-    }
+const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
+  const { name: username, email, password } = data;
 
-    if (password.length < 6) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Password must be at least 6 characters",
-      });
-      return;
-    }
+  if (!email || !password || !username) {
+    Toast.show({
+      type: 'error',
+      text1: 'Error',
+      text2: 'Please fill in all fields',
+    });
+    return;
+  }
 
-    setIsLoading(true);
-    try {
-      const response = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      // console.log("User created", response.user);
-      if (!response.user) {
-        throw new Error("User creation failed");
-      }
-      await updateProfile(response.user, {
-        displayName: username,
-        photoURL: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
-          username
-        )}`,
-      });
-      const { uid } = response.user;
-      registerUserMutation.mutate({
-        name: username,
-        email,
-        id: uid,
-        image: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
-          username
-        )}`,
-      });
-    } catch (error: any) {
-      console.log(error.code);
-      
-      let errorMessage = "An error occurred during signup";
-      if (error.code) {
-        switch (error.code) {
-          case "auth/invalid-credential":
-            errorMessage = "Invalid credentials";
-            break;
-          case "auth/invalid-email":
-            errorMessage = "Invalid email";
-            break;
-          case "auth/user-disabled":
-            errorMessage = "User is disabled";
-            break;
-          case "auth/user-not-found":
-            errorMessage = "User not found";
-            break;
-          case "auth/wrong-password":
-            errorMessage = "Wrong password";
-            break;
-          case "auth/email-already-in-use":
-            errorMessage = "Email already in use";
-            break;
-          default:
-            errorMessage = error.message || JSON.stringify(error);
-        }
-      }
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: errorMessage,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  setIsLoading(true);
+  try {
+    // Create Firebase user
+    const response = await createUserWithEmailAndPassword(auth, email, password);
+    
+    // Update profile
+    await updateProfile(response.user, {
+      displayName: username,
+      photoURL: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(username)}`,
+    });
+
+    // Send verification email
+    await sendEmailVerification(response.user);
+
+    // Register in your database
+    await registerUserMutation.mutateAsync({
+      name: username,
+      email,
+      id: response.user.uid,
+      image: response.user.photoURL || '',
+    });
+
+    Toast.show({
+      type: 'success',
+      text1: 'Account Created',
+      text2: 'Please check your email to verify your account',
+    });
+
+    // Sign out user until they verify
+    await auth.signOut();
+    
+  } catch (error: any) {
+    console.error('Signup error:', error);
+    Toast.show({
+      type: 'error',
+      text1: 'Signup Failed',
+      text2: getErrorMessage(error),
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <View style={styles.container}>
@@ -280,7 +252,7 @@ export default function SignUp() {
 
         <View style={styles.signUpContainer}>
           <Text style={styles.signUpText}>Don't have an account? </Text>
-          <Link href={"/sign-in"}>
+          <Link href={"/(auth)/sign-in"}>
             <Text style={styles.signUpLink}>Sign In</Text>
           </Link>
         </View>
