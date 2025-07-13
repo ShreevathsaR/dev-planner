@@ -26,18 +26,41 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   createUserWithEmailAndPassword,
-  GoogleAuthProvider,
   sendEmailVerification,
-  signInWithPopup,
   updateProfile,
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { setSession } from "@/lib/setSession";
+import { handleGoogleSignIn } from "@/lib/services/googleSignIn";
+import { trpcReact } from "@dev-planner/trpc";
 
 export default function Signup() {
   const [isLoading, setIsLoading] = useState(false);
+  const [token, setToken] = useState("")
   const router = useRouter();
-  const provider = new GoogleAuthProvider();
+
+  const registerUserMutation = trpcReact.user.registerUser.useMutation({
+    onSuccess: async () => {
+      await setSession(token);
+      router.replace("/dashboard");
+      setIsLoading(false);
+      await sendEmailVerification(auth.currentUser!);
+      return toast.success("Verification email sent successfully");
+    },
+    onError: async (error) => {
+      console.log(error)
+      if (error.data?.code === "CONFLICT") {
+        await setSession(token);
+        router.replace("/dashboard");
+        setIsLoading(false);
+        return toast.success("Logged-in successfully");
+      }
+      setIsLoading(false);
+      return toast.error("Failed storing user", {
+        description: error.message,
+      });
+    },
+  });
 
   const form = useForm({
     resolver: zodResolver(signUpSchema),
@@ -74,9 +97,12 @@ export default function Signup() {
         displayName: name,
         photoURL: profilePicture.url,
       });
-      await sendEmailVerification(response.user);
-
-      //TODO: Save user profile details in database
+      await registerUserMutation.mutate({
+        name,
+        email,
+        image: profilePicture.url,
+        id: response.user.uid,
+      });
 
       return toast.success("Please check your email for verification");
     } catch (error: any) {
@@ -107,48 +133,6 @@ export default function Signup() {
     }
   }
 
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true);
-    try {
-      const response = await signInWithPopup(auth, provider);
-
-      console.log("User", response.user);
-
-      const credential = GoogleAuthProvider.credentialFromResult(response);
-
-      console.log("AccessToken", credential?.accessToken);
-
-      const token = await response.user.getIdToken();
-      await setSession(token);
-      router.replace("dashboard");
-    } catch (error: any) {
-      let errorMessage = "An error occurred during Google login";
-
-      if (error.code) {
-        switch (error.code) {
-          case "auth/popup-closed-by-user":
-            errorMessage = "Google Sign-In was cancelled";
-            break;
-          case "auth/cancelled-popup-request":
-            errorMessage = "Google Sign-In was cancelled";
-            break;
-          case "auth/popup-blocked":
-            errorMessage = "Google Sign-In was blocked";
-            break;
-          case "auth/popup-blocked":
-            errorMessage = "Google Sign-In was blocked";
-            break;
-        }
-      }
-
-      toast.error("Error signing", {
-        description: errorMessage,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className="flex bg-foreground flex-col min-h-screen justify-center gap-6">
       <Card className="w-100 self-center bg-secondary-background border-white/20 border-1">
@@ -161,7 +145,7 @@ export default function Signup() {
         <CardContent>
           <Button
             disabled={isLoading}
-            onClick={() => handleGoogleSignIn()}
+            onClick={() => handleGoogleSignIn({registerUserMutation, setIsLoading, setToken})}
             variant="outline"
             className="w-full mb-5 text-accent bg-black border-white/15 hover:bg-white/15 hover:cursor-pointer hover:text-accent"
           >

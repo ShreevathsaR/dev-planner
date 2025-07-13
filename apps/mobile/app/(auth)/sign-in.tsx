@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { auth } from "../_layout";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import {
   GoogleAuthProvider,
   signInWithCredential,
@@ -17,20 +17,18 @@ import {
 import {
   GoogleSignin,
   statusCodes,
-  GoogleSigninButton,
 } from "@react-native-google-signin/google-signin";
 import Toast from "react-native-toast-message";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, set, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { signInSchema } from "@dev-planner/schema";
+import { trpcReact } from "@dev-planner/trpc";
+import { handleGoogleSignIn } from "@/lib/auth/googleSignIn";
+import { sendVerificationEmail } from "@/lib/auth/sendVerificationEmail";
 
 export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
-  GoogleSignin.configure({
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
-    scopes: ["profile", "email"],
-  });
 
   const {
     control,
@@ -57,9 +55,32 @@ export default function SignIn() {
     }
     setIsLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const response = await signInWithEmailAndPassword(auth, email, password);
+      console.log("Sign-in response:", response.user);
+
+      await response.user.reload();
+      const refreshedUser = auth.currentUser;
+      if (!refreshedUser?.emailVerified) {
+        console.log("User is not verified");
+        Toast.show({
+          type: "success",
+          text1: "Verification mail sent",
+          text2: "Please verify your email to continue",
+        });
+        await sendVerificationEmail(response.user);
+        await auth.signOut();
+        setIsLoading(false);
+        return
+      }
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Logged in successfully",
+      });
+      setIsLoading(false);
+      router.replace("/(app)/project1");
     } catch (error: any) {
-      let errorMessage = "An error occurred during Google login";
+      let errorMessage = "An error occurred during login";
       if (error.code) {
         switch (error.code) {
           case statusCodes.SIGN_IN_CANCELLED:
@@ -100,60 +121,23 @@ export default function SignIn() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true);
-    try {
-      await GoogleSignin.hasPlayServices();
-      await GoogleSignin.signOut();
-      const { data } = await GoogleSignin.signIn();
-      const googleCredential = GoogleAuthProvider.credential(data?.idToken);
-      await signInWithCredential(auth, googleCredential);
-      console.log("Logged in with Google");
-      // setIsAuthorized(true);
-      // await syncUser();
-    } catch (error: any) {
-      // Handle Google Sign-In errors
-      console.log(error);
-      let errorMessage = "An error occurred during Google login";
-      if (error.code) {
-        switch (error.code) {
-          case statusCodes.SIGN_IN_CANCELLED:
-            errorMessage = "Google Sign-In was cancelled";
-            break;
-          case statusCodes.IN_PROGRESS:
-            errorMessage = "Google Sign-In is already in progress";
-            break;
-          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-            errorMessage = "Google Play Services is not available";
-            break;
-          case "auth/invalid-credential":
-            errorMessage = "Invalid credentials";
-            break;
-          case "auth/invalid-email":
-            errorMessage = "Invalid email";
-            break;
-          case "auth/user-disabled":
-            errorMessage = "User is disabled";
-            break;
-          case "auth/user-not-found":
-            errorMessage = "User not found";
-            break;
-          case "auth/wrong-password":
-            errorMessage = "Wrong password";
-            break;
-          default:
-            errorMessage = error.message || JSON.stringify(error);
-        }
-      }
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: errorMessage,
-      });
-    } finally {
+  const registerUserMutation = trpcReact.user.registerUser.useMutation({
+    onSuccess: async ({user}) => {
+      console.log(user)
       setIsLoading(false);
-    }
-  };
+    },
+    onError: async (error) => {
+      console.log(error);
+      if (error.data?.code === "CONFLICT") {
+        setIsLoading(false);
+      }
+      setIsLoading(false);
+      return Toast.show({
+        text1: "Failed storing user",
+        text2: error.message,
+      });
+    },
+  });
 
   return (
     <View style={styles.container}>
@@ -238,7 +222,7 @@ export default function SignIn() {
         {/* Google Sign In */}
         <TouchableOpacity
           style={styles.googleButton}
-          onPress={() => handleGoogleSignIn()}
+          onPress={() => handleGoogleSignIn({ setIsLoading, registerUserMutation })}
           disabled={isLoading}
         >
           <Text style={styles.googleButtonText}>Continue with Google</Text>

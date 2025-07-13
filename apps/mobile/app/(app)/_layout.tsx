@@ -1,4 +1,3 @@
-// app/(app)/_layout.tsx
 import {
   DrawerContentComponentProps,
   DrawerContentScrollView,
@@ -23,7 +22,6 @@ export default function AppLayout() {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      // Router will automatically redirect to (auth) via root layout
     } catch (error) {
       console.error("Error signing out:", error);
     }

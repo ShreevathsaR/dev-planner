@@ -1,11 +1,12 @@
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { toast } from "sonner";
 import { auth } from "../firebase";
+import { trpcReact } from "@dev-planner/trpc";
 
 interface GoogleSignInType {
-  setIsLoading: any;
-  setToken: any;
-  registerUserMutation: any;
+  setIsLoading: (loading: boolean) => void;
+  setToken: (token: string) => void;
+  registerUserMutation: ReturnType<typeof trpcReact.user.registerUser.useMutation>;
 }
 
 export const handleGoogleSignIn = async ({

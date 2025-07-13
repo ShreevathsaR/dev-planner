@@ -10,31 +10,63 @@ import {
 } from "react-native";
 import {
   createUserWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithCredential,
+  sendEmailVerification,
+  updateCurrentUser,
+  updateProfile,
 } from "firebase/auth";
 import { auth } from "../_layout";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import Toast from "react-native-toast-message";
 import { HelloWave } from "@/components/HelloWave";
-import {
-  GoogleSignin,
-  statusCodes,
-} from "@react-native-google-signin/google-signin";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { signUpSchema } from "@dev-planner/schema";
+import { handleGoogleSignIn } from "@/lib/auth/googleSignIn";
+import { trpcReact } from "@dev-planner/trpc";
 
 export default function SignUp() {
   const [isLoading, setIsLoading] = useState(false);
 
-  GoogleSignin.configure({
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
-    scopes: ["profile", "email"],
+  const registerUserMutation = trpcReact.user.registerUser.useMutation({
+    onSuccess: async ({ user }) => {
+      console.log(user);
+      if (auth.currentUser) {
+        sendEmailVerification(auth.currentUser!);
+        Toast.show({
+          type: "success",
+          text1: "Email Verification Sent",
+          text2: "Please check your email to verify your account.",
+        });
+      }
+      setIsLoading(false);
+    },
+    onError: async (error) => {
+      console.log(error);
+      if (error.data?.code === "CONFLICT") {
+        if (auth.currentUser) {
+          sendEmailVerification(auth.currentUser!);
+          Toast.show({
+            type: "success",
+            text1: "Email Verification Sent",
+            text2: "Please check your email to verify your account.",
+          });
+        }
+      } else {
+        setIsLoading(false);
+        return Toast.show({
+          text1: "Failed storing user",
+          text2: error.message,
+        });
+      }
+    },
   });
 
-  const { control, handleSubmit, formState: { errors } } = useForm({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
       name: "",
@@ -66,46 +98,53 @@ export default function SignUp() {
 
     setIsLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      // Router will automatically redirect to (app) via root layout
-    } catch (error: any) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: error.message || "An error occurred during sign up",
+      const response = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      // console.log("User created", response.user);
+      if (!response.user) {
+        throw new Error("User creation failed");
+      }
+      await updateProfile(response.user, {
+        displayName: username,
+        photoURL: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
+          username
+        )}`,
       });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true);
-    try {
-      await GoogleSignin.hasPlayServices();
-      await GoogleSignin.signOut();
-      const { data } = await GoogleSignin.signIn();
-      const googleCredential = GoogleAuthProvider.credential(data?.idToken);
-      await signInWithCredential(auth, googleCredential);
-      console.log("Logged in with Google");
-      // setIsAuthorized(true);
-      // await syncUser();
+      const { uid } = response.user;
+      registerUserMutation.mutate({
+        name: username,
+        email,
+        id: uid,
+        image: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
+          username
+        )}`,
+      });
     } catch (error: any) {
-      // Handle Google Sign-In errors
-      let errorMessage = "An error occurred during Google login";
+      console.log(error.code);
+      
+      let errorMessage = "An error occurred during signup";
       if (error.code) {
         switch (error.code) {
-          case "auth/argument-error":
-            errorMessage = "Google Sign-In was cancelled";
+          case "auth/invalid-credential":
+            errorMessage = "Invalid credentials";
             break;
-          case statusCodes.IN_PROGRESS:
-            errorMessage = "Google Sign-In is already in progress";
+          case "auth/invalid-email":
+            errorMessage = "Invalid email";
             break;
-          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-            errorMessage = "Google Play Services is not available";
+          case "auth/user-disabled":
+            errorMessage = "User is disabled";
             break;
-          case "auth/email-already-exists":
-            errorMessage = "Email already exists";
+          case "auth/user-not-found":
+            errorMessage = "User not found";
+            break;
+          case "auth/wrong-password":
+            errorMessage = "Wrong password";
+            break;
+          case "auth/email-already-in-use":
+            errorMessage = "Email already in use";
             break;
           default:
             errorMessage = error.message || JSON.stringify(error);
@@ -232,7 +271,9 @@ export default function SignUp() {
 
         <TouchableOpacity
           style={styles.googleButton}
-          onPress={() => handleGoogleSignIn()}
+          onPress={() =>
+            handleGoogleSignIn({ registerUserMutation, setIsLoading() {} })
+          }
         >
           <Text style={styles.googleButtonText}>Continue with Google</Text>
         </TouchableOpacity>
