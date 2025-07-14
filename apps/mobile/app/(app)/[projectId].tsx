@@ -13,7 +13,7 @@ import {
 import { TextInput } from "react-native-gesture-handler";
 import Icon from "@expo/vector-icons/Feather";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Stack, useLocalSearchParams, useNavigation } from "expo-router";
+import { router, Stack, useLocalSearchParams, useNavigation } from "expo-router";
 import { projects } from "@/lib/sample";
 
 const { width } = Dimensions.get("window");
@@ -67,7 +67,16 @@ export default function Project() {
     <>
       <StatusBar barStyle="light-content" backgroundColor="#000000" />
       <View style={styles.container}>
-        <Stack.Screen options={{ headerShown: true, headerTitle: `${project?.name}`, headerTitleAlign:"center" }} />
+        <Stack.Screen options={{ headerShown: true, headerTitle: `${project?.name}`, headerTitleAlign:"center", headerRight: () => (
+          <TouchableOpacity
+            onPress={() => {
+              router.push(`/project/projectDetails?projectId=${projectId}`);
+            }}
+            style={{ marginRight: 16 }}
+          >
+            <Icon name="info" size={24} color="white" />
+          </TouchableOpacity>
+        )}} />
         <KeyboardAvoidingView
           style={styles.keyboardAvoidingView}
           behavior={Platform.OS === "ios" ? "padding" : "height"}

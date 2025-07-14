@@ -70,23 +70,6 @@ export default function DrawerLayout() {
                 Projects
               </Text>
             </View>
-            {/* <TouchableOpacity
-              onPress={() => toggleDrawer(navigation)}
-            >
-              <Text
-                style={{
-                  color: "white",
-                  fontWeight: "bold",
-                  backgroundColor: "black",
-                  borderWidth: 1,
-                  borderColor: "gray",
-                  padding: 8,
-                  borderRadius: 10,
-                }}
-              >
-                <FeatherIcon name="chevrons-left" size={24} color="white" />
-              </Text>
-            </TouchableOpacity> */}
           </View>
           {/* <DrawerItemList {...props} /> */}
 
@@ -114,13 +97,22 @@ export default function DrawerLayout() {
               style={{
                 padding: 10,
                 backgroundColor: "black",
-                flex: 1,
                 justifyContent: "center",
                 alignItems: "center",
                 gap: 10,
               }}
             >
               <Text style={{ color: "lightgray" }}>No projects found</Text>
+            </View>
+          )}
+          <View
+            style={{
+              padding: 10,
+              backgroundColor: "black",
+              alignItems: "center",
+            }}
+          >
+            <Link href={`/project/createProject?userId=${user?.uid}`} asChild>
               <TouchableOpacity
                 style={{
                   backgroundColor: "lightgray",
@@ -135,10 +127,10 @@ export default function DrawerLayout() {
                 }}
               >
                 <Feather name="plus" size={24} color="black" />
-                <Text style={{fontWeight:'bold'}}>Create Project</Text>
+                <Text style={{ fontWeight: "bold" }}>Create Project</Text>
               </TouchableOpacity>
-            </View>
-          )}
+            </Link>
+          </View>
         </View>
         <View
           style={{
@@ -216,7 +208,9 @@ export default function DrawerLayout() {
           },
           headerTintColor: "white",
         }}
-      ></Drawer>
+      >
+        <Drawer.Screen name="project" options={{ headerShown: true, headerTitle: "" }} />
+      </Drawer>
     </View>
   );
 }

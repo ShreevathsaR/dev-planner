@@ -35,6 +35,4 @@ model Project {
   updatedAt     DateTime @default(now())
   createdBy     String
   createdByUser User     @relation(fields: [createdBy], references: [id])
-
-  @@unique([name])
 }

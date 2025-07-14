@@ -226,8 +226,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.11.0
-   * Query Engine version: 9c30299f5a0ea26a96790e13f796dc6094db3173
+   * Prisma Client JS version: 6.11.1
+   * Query Engine version: f40f79ec31188888a2e33acda0ecc8fd10a853a9
    */
   export type PrismaVersion = {
     client: string
@@ -3385,17 +3385,17 @@ export namespace Prisma {
 
   export type ProjectWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    name?: string
     AND?: ProjectWhereInput | ProjectWhereInput[]
     OR?: ProjectWhereInput[]
     NOT?: ProjectWhereInput | ProjectWhereInput[]
+    name?: StringFilter<"Project"> | string
     description?: StringNullableFilter<"Project"> | string | null
     details?: JsonNullableFilter<"Project">
     createdAt?: DateTimeFilter<"Project"> | Date | string
     updatedAt?: DateTimeFilter<"Project"> | Date | string
     createdBy?: StringFilter<"Project"> | string
     createdByUser?: XOR<UserScalarRelationFilter, UserWhereInput>
-  }, "id" | "name">
+  }, "id">
 
   export type ProjectOrderByWithAggregationInput = {
     id?: SortOrder
