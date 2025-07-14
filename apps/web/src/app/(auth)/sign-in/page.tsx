@@ -38,6 +38,10 @@ export default function Signin() {
   const [token, setToken] = useState("");
   const router = useRouter();
 
+  const {data, error} = trpcReact.projects.testProject.useQuery();
+
+  console.log('trpc', data, error)
+
   const registerUserMutation = trpcReact.user.registerUser.useMutation({
     onSuccess: async () => {
       await setSession(token);
@@ -47,6 +51,7 @@ export default function Signin() {
     },
     onError: async (error) => {
       console.log(error)
+      console.log(error.data)
       if (error.data?.code === "CONFLICT") {
         await setSession(token);
         router.replace("/dashboard");

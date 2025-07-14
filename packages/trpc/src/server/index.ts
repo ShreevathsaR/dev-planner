@@ -1,3 +1,4 @@
 export { appRouter } from "./router";
 export type { AppRouter } from "./router";
-export { router, procedure, middleware, TRPCError } from "./trpc";
+export { createContext } from "./context";
+export { router, procedure,  protectedProcedure, middleware, TRPCError } from "./trpc";

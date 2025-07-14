@@ -1,9 +1,9 @@
 import { prisma, Prisma } from "@dev-planner/prisma";
-import { TRPCError, procedure, router } from "../trpc";
+import { TRPCError, protectedProcedure, router } from "../trpc";
 import { createProjectSchema } from "@dev-planner/schema";
 
 export const projectRouter = router({
-  createProject: procedure
+  createProject: protectedProcedure
     .input(createProjectSchema)
     .mutation(async ({ input }) => {
       const { name, createdBy } = input;
@@ -36,7 +36,7 @@ export const projectRouter = router({
         });
       }
     }),
-  testProject: procedure.query(() => {
-    return "Hi";
+  testProject: protectedProcedure.query(({ctx}) => {
+    return `Hello ${ctx.user?.email}`;
   }),
 }) satisfies any;
