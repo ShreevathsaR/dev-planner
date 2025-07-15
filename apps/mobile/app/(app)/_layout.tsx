@@ -2,37 +2,94 @@ import {
   DrawerContentComponentProps,
   DrawerContentScrollView,
   DrawerItem,
-  DrawerItemList,
 } from "@react-navigation/drawer";
-import {
-  Link,
-  router,
-  useNavigation,
-  usePathname,
-  useSegments,
-} from "expo-router";
+import { Link, router } from "expo-router";
 import Drawer from "expo-router/drawer";
 import { signOut } from "firebase/auth";
-import { Button, FlatList, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { auth } from "../_layout";
 import { Image } from "expo-image";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { projects } from "@/lib/sample";
 import Feather from "@expo/vector-icons/Feather";
+import { useProjectsStore } from "@/lib/context/userStore";
+import { trpcReact } from "@dev-planner/trpc/client";
+import { useEffect } from "react";
 
 export default function DrawerLayout() {
   const { user } = useAuth();
-  const pathname = usePathname();
+  const projects = useProjectsStore((state: any) => state.projects);
+  const setSelectedProject = useProjectsStore(
+    (state) => state.setSelectedProject
+  );
+  const selectedProject = useProjectsStore((state) => state.selectedProject);
+  const setProjects = useProjectsStore((state) => state.setProjects);
+
+  const {
+    data: userProjects,
+    error: projectFetchingError,
+    isFetching,
+  } = trpcReact.projects.userProjects.useQuery();
+  console.log(userProjects?.message);
+
+  useEffect(() => {
+    if (userProjects && userProjects.data) {
+      if (userProjects.data.length > 0) {
+        const data = userProjects.data;
+        setProjects(data);
+
+        if (!selectedProject && data.length > 0) {
+          setSelectedProject(data[0]);
+          if (data[0]?.id) {
+            router.replace(`/${data[0].id}`);
+          }
+        }
+      } else {
+        setProjects([]);
+      }
+    }
+
+    if (projectFetchingError) {
+      console.error("Error fetching user projects:", projectFetchingError);
+    }
+  }, [
+    user,
+    userProjects,
+    setProjects,
+    setSelectedProject,
+    projectFetchingError,
+  ]);
 
   const handleSignOut = async () => {
     try {
       await signOut(auth);
+      setProjects([]);
+      setSelectedProject(null);
     } catch (error) {
       console.error("Error signing out:", error);
     }
   };
 
-  const navigation = useNavigation();
+  if (isFetching) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "black",
+        }}
+      >
+        <ActivityIndicator size="large" color="white" />
+        <Text style={{ color: "white" }}>Loading...</Text>
+      </View>
+    );
+  }
 
   const CustomDrawerContent = (props: DrawerContentComponentProps) => {
     return (
@@ -53,7 +110,9 @@ export default function DrawerLayout() {
             borderRadius: 10,
           }}
         ></View>
-        <View style={{ flex: 1, backgroundColor: "black", gap: 2, padding: 0 }}>
+        <ScrollView
+          style={{ flex: 1, backgroundColor: "black", gap: 2, padding: 0 }}
+        >
           <View
             style={{
               flexDirection: "row",
@@ -73,19 +132,22 @@ export default function DrawerLayout() {
           </View>
           {/* <DrawerItemList {...props} /> */}
 
-          {projects.length > 0 ? (
-            projects.map((item) => {
+          {projects && projects.length > 0 ? (
+            projects.map((item: any) => {
               return (
                 <DrawerItem
                   activeTintColor="white"
-                  focused={pathname === `/${item.id}`}
+                  focused={selectedProject?.id === item.id}
                   style={{ borderRadius: 10, marginBottom: 5 }}
                   inactiveTintColor="white"
                   activeBackgroundColor="#242424"
                   labelStyle={{ color: "white" }}
                   key={item.id}
-                  label={`Project ${item.name}`}
+                  label={`${item.name}`}
                   onPress={() => {
+                    if (item.id !== selectedProject?.id) {
+                      setSelectedProject(item);
+                    }
                     router.push(`/${item.id}`);
                   }}
                   {...props}
@@ -131,7 +193,7 @@ export default function DrawerLayout() {
               </TouchableOpacity>
             </Link>
           </View>
-        </View>
+        </ScrollView>
         <View
           style={{
             padding: 16,
@@ -188,7 +250,6 @@ export default function DrawerLayout() {
           drawerItemStyle: {
             borderRadius: 5,
           },
-          headerShown: true,
           drawerInactiveBackgroundColor: "black",
           drawerActiveBackgroundColor: "#242424",
           drawerActiveTintColor: "white",
@@ -209,7 +270,14 @@ export default function DrawerLayout() {
           headerTintColor: "white",
         }}
       >
-        <Drawer.Screen name="project" options={{ headerShown: true, headerTitle: "" }} />
+        <Drawer.Screen
+          name="project"
+          options={{ headerShown: false, headerTitle: "" }}
+        />
+        <Drawer.Screen
+          name="index"
+          options={{ headerShown: false, headerTitle: "" }}
+        />
       </Drawer>
     </View>
   );

@@ -16,6 +16,11 @@ config.resolver.nodeModulesPaths = [
   path.resolve(monorepoRoot, 'node_modules'),
 ];
 
+config.resolver.alias = {
+  '@dev-planner/schema': path.resolve(monorepoRoot, 'packages/schema'),
+  '@dev-planner/trpc': path.resolve(monorepoRoot, 'packages/trpc'),
+};
+
 config.resolver.sourceExts.push('cjs');
 
 config.resolver.unstable_enablePackageExports = false;

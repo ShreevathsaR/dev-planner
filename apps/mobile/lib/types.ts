@@ -11,3 +11,26 @@ export interface createProjectType {
       }
     | undefined;
 }
+
+export interface Project {
+  name: string;
+  id: string;
+  description: string | null;
+  details: {
+    budget?: "low" | "medium" | "high" | undefined;
+    teamSize?: number | undefined;
+    skills?: string[] | undefined;
+    timeline?: string | undefined;
+  } | null;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+}
+
+export interface ProjectsStore {
+  projects: Project[];
+  setProjects: (projects: Project[]) => void;
+  setSelectedProject: (project: Project | null) => void;
+  selectedProject: Project | null;
+  addProject: (project: Project) => void;
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/app/_layout'; 
+import { queryClient, trpcClient } from '../trpc';
 
 export interface AuthState {
   user: User | null;
@@ -25,6 +26,7 @@ export const useAuth = (): AuthState => {
         }
       } else {
         setUser(null);
+        queryClient.clear();
       }
       setIsLoading(false);
     });

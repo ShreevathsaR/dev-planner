@@ -8,12 +8,11 @@ export default function ProjectDetailsLayout() {
   return (
     <SelectProvider>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="projectDetails" />
+        <Stack.Screen name="index" options={{headerShown: true}} />
         <Stack.Screen
           name="createProject"
           options={{
-            headerShown: false,
+            headerShown: true,
             headerBackground: () => {
               return <View style={{ backgroundColor: "black", height: 100 }} />;
             },
@@ -33,7 +32,7 @@ export default function ProjectDetailsLayout() {
         <Stack.Screen
           name="moreProjectDetails"
           options={{
-            headerShown: false,
+            headerShown: true,
             headerBackground: () => {
               return <View style={{ backgroundColor: "black", height: 100 }} />;
             },

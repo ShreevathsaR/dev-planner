@@ -1,6 +1,7 @@
 import { prisma, Prisma } from "@dev-planner/prisma";
 import { TRPCError, protectedProcedure, router } from "../trpc";
 import { createProjectSchema } from "@dev-planner/schema";
+import { ProjectDetails, ProjectWithTypedDetails } from "../types";
 
 export const projectRouter = router({
   createProject: protectedProcedure
@@ -19,10 +20,13 @@ export const projectRouter = router({
         const project = await prisma.project.create({
           data: input,
         });
-        return { success: true, message: "Project created successfully", data: project};
+        return {
+          success: true,
+          message: "Project created successfully",
+          data: project,
+        };
       } catch (error) {
-        if (
-          error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
           throw new TRPCError({
             code: "NOT_IMPLEMENTED",
             message: "Project creation failed",
@@ -36,7 +40,53 @@ export const projectRouter = router({
         });
       }
     }),
-  testProject: protectedProcedure.query(({ctx}) => {
+  userProjects: protectedProcedure.query(
+    async ({
+      ctx,
+    }): Promise<{
+      success: boolean;
+      message: string;
+      data: ProjectWithTypedDetails[];
+    }> => {
+      const { user } = ctx;
+
+      try {
+        const rawProjects = await prisma.project.findMany({
+          where: {
+            createdBy: user.uid,
+          },
+        });
+
+        const projects: ProjectWithTypedDetails[] = rawProjects.map(
+          (project) => ({
+            ...project,
+            details: project.details as ProjectDetails | null,
+          })
+        );
+
+        return {
+          success: true,
+          message: `Projects fetched successfully for ${user.email}`,
+          data: projects,
+        };
+      } catch (error) {
+        console.log(error);
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+          throw new TRPCError({
+            code: "NOT_IMPLEMENTED",
+            message: "Failed fetching projects from database",
+          });
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Internal server error",
+          cause: error,
+        });
+      }
+    }
+  ),
+  testProject: protectedProcedure.query(({ ctx }) => {
     return `Hello ${ctx.user?.email}`;
   }),
 }) satisfies any;

@@ -7,7 +7,7 @@ import {
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "expo-router/build/hooks";
-import { router, Stack, useNavigation } from "expo-router";
+import { Link, router, Stack, useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { navigate } from "expo-router/build/global-state/routing";
 import Toast from "react-native-toast-message";
@@ -20,11 +20,13 @@ import * as z from "zod";
 import Icon from "@expo/vector-icons/Feather";
 import SelectDropdown from "react-native-select-dropdown";
 import { useAuth } from "@/lib/hooks/useAuth";
+import Feather from "@expo/vector-icons/Feather";
+import { useProjectsStore } from "@/lib/context/userStore";
 
 export default function CreateProject() {
-  //   const userId = useSearchParams().get("userId");
   const navigation = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
+  const selectedProject = useProjectsStore((state) => state.selectedProject);
   const { user } = useAuth();
 
   const budgetOptions = [
@@ -64,14 +66,12 @@ export default function CreateProject() {
     setValue("createdBy", user?.uid || "123", { shouldValidate: true });
   }, [user, setValue]);
 
-  console.log("is valid", errors);
-
   const onSubmit = async (data: z.infer<typeof createProjectSchema>) => {
     setIsLoading(true);
     console.log(data);
     if (user) {
       router.replace({
-        pathname: "/project/moreProjectDetails",
+        pathname: "./moreProjectDetails",
         params: {
           data: encodeURIComponent(JSON.stringify(data)),
         },
@@ -88,6 +88,24 @@ export default function CreateProject() {
 
   return (
     <View style={styles.container}>
+      <Stack.Screen
+        options={{
+          headerLeft: () => {
+            return (
+              <Link href={selectedProject ? `/${selectedProject.id}` : '/(app)/'} style={{ marginLeft: 5, padding: 10 }}>
+                <Feather name="arrow-left" size={24} color="white" />
+              </Link>
+            );
+          },
+          headerShown: true,
+          headerTitle: "",
+          headerBackground: () => {
+            return (
+              <View style={{ backgroundColor: "black", height: 100 }}></View>
+            );
+          },
+        }}
+      />
       <View style={styles.formContainer}>
         {/* Header */}
         <View style={styles.header}>

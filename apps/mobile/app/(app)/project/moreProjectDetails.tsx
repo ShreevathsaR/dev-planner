@@ -6,16 +6,18 @@ import {
   View,
   TextInput,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Toast from "react-native-toast-message";
 import MultiSelect from "react-native-multiple-select";
-import { router, useLocalSearchParams } from "expo-router";
+import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { createProjectType } from "@/lib/types";
 import { trpcReact } from "@dev-planner/trpc";
+import { useProjectsStore } from "@/lib/context/userStore";
+import Feather from "@expo/vector-icons/Feather";
 
-export default function CreateProject() {
-  const { data } = useLocalSearchParams();
-  const projectData = JSON.parse(data as string) as createProjectType;
+export default function MoreProjectDetails() {
+  const params = useLocalSearchParams();
+  const projectData = JSON.parse(params.data as string);
 
   const [isLoading, setIsLoading] = useState(false);
   const [skills, setSkills] = useState<any>([]);
@@ -25,8 +27,16 @@ export default function CreateProject() {
     timeline: "",
   });
 
+  const setSelectedProject = useProjectsStore(
+    (state) => state.setSelectedProject
+  );
+  const selectedProject = useProjectsStore((state) => state.selectedProject);
+  const addProject = useProjectsStore((state) => state.addProject);
+
   const createProject = trpcReact.projects.createProject.useMutation({
-    onSuccess: () => {
+    onSuccess: async ({ data }: any) => {
+      addProject(data);
+      setSelectedProject(data);
       Toast.show({
         type: "success",
         text1: "Project created successfully",
@@ -45,13 +55,6 @@ export default function CreateProject() {
       setIsLoading(false);
     },
   });
-
-  const dummyOptions = [
-    { id: "1", name: "React" },
-    { id: "2", name: "Node.js" },
-    { id: "3", name: "PostgreSQL" },
-    { id: "4", name: "TypeScript" },
-  ];
 
   const skillOptions = [
     { label: "React", value: "React" },
@@ -86,7 +89,17 @@ export default function CreateProject() {
     { label: "TailwindCSS", value: "TailwindCSS" },
   ];
 
-  const onSubmit = () => {
+  const onSubmit = useCallback(() => {
+    if (!projectData) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Project data is missing",
+        visibilityTime: 2000,
+      });
+      return;
+    }
+
     console.log({ skills, timeline });
     setIsLoading(true);
 
@@ -106,6 +119,7 @@ export default function CreateProject() {
       setIsLoading(false);
       return;
     }
+
     createProject.mutate({
       ...projectData,
       details: {
@@ -114,17 +128,93 @@ export default function CreateProject() {
         timeline,
       },
     });
+  }, [projectData, skills, timeline, createProject]);
 
-    setIsLoading(false);
-  };
+  const handleSkip = useCallback(() => {
+    if (!projectData) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Project data is missing",
+        visibilityTime: 2000,
+      });
+      return;
+    }
 
-  const handleSkip = () => {
     setIsLoading(true);
-    createProject.mutate({...projectData});
-  };
+    createProject.mutate({ ...projectData });
+  }, [projectData, createProject]);
+
+  const handleSkillsChange = useCallback((items: any) => {
+    setSkills(items);
+    setErrorMessage((state) => ({
+      ...state,
+      skills: "",
+    }));
+  }, []);
+
+  const handleTimelineChange = useCallback((text: string) => {
+    setTimeline(text);
+    setErrorMessage((state) => ({
+      ...state,
+      timeline: "",
+    }));
+  }, []);
+
+  // Show loading or error state if projectData is not available
+  if (!projectData) {
+    return (
+      <View style={styles.container}>
+        <Stack.Screen
+          options={{
+            headerLeft: () => {
+              return (
+                <Link href={selectedProject ? `/${selectedProject.id}` : '/(app)/'} style={{ marginLeft: 5, padding: 10 }}>
+                  <Feather name="arrow-left" size={24} color="white" />
+                </Link>
+              );
+            },
+            headerShown: true,
+            headerTitle: "",
+            headerBackground: () => {
+              return (
+                <View style={{ backgroundColor: "black", height: 100 }}></View>
+              );
+            },
+          }}
+        />
+        <View
+          style={[
+            styles.formContainer,
+            { justifyContent: "center", alignItems: "center" },
+          ]}
+        >
+          <Text style={styles.label}>Loading project data...</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
+      <Stack.Screen
+        options={{
+          headerLeft: () => {
+            return (
+              <Link href="/" style={{ marginLeft: 10 }}>
+                <Feather name="arrow-left" size={24} color="white" />
+              </Link>
+            );
+          },
+          headerShown: true,
+          headerTitle: "",
+          headerBackground: () => {
+            return (
+              <View style={{ backgroundColor: "black", height: 100 }}></View>
+            );
+          },
+        }}
+      />
       <View style={styles.formContainer}>
         {/* Header */}
         <View style={styles.header}>
@@ -151,13 +241,7 @@ export default function CreateProject() {
               borderColor: "#242424",
               borderWidth: 1,
             }}
-            onSelectedItemsChange={(items) => {
-              setSkills(items),
-                setErrorMessage((state) => ({
-                  ...state,
-                  skills: "",
-                }));
-            }}
+            onSelectedItemsChange={handleSkillsChange}
             selectedItems={skills}
             selectText="Select Skills"
             searchInputPlaceholderText="Search Skills..."
@@ -196,7 +280,6 @@ export default function CreateProject() {
               padding: 20,
               borderBottomColor: "#242424",
             }}
-            // style
           />
         </View>
         {errorMessage.skills && (
@@ -209,7 +292,7 @@ export default function CreateProject() {
           <TextInput
             style={[styles.input, styles.textAreaInput]}
             value={timeline}
-            onChangeText={setTimeline}
+            onChangeText={handleTimelineChange}
             placeholder="Enter timeline (e.g., 3 months)"
             placeholderTextColor="#6B7280"
             multiline
@@ -237,7 +320,6 @@ export default function CreateProject() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
