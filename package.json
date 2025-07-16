@@ -4,7 +4,6 @@
   "private": "true",
   "description": "",
   "scripts": {
-    "build":"pnpm build:packages && pnpm build --filter web",
     "web":"pnpm --filter web dev",
     "mobile":"pnpm --filter mobile start",
     "start":"pnpm --filter web dev & pnpm --filter mobile start",
