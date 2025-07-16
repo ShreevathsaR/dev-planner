@@ -1,9 +1,9 @@
 import * as z from "zod";
 import { prisma, Prisma } from "@dev-planner/prisma";
-import { TRPCError, procedure, router } from "../trpc";
+import { TRPCError, tprocedure, trouter } from "../trpc";
 
-export const userRouter = router({
-  registerUser: procedure
+export const userRouter = trouter({
+  registerUser: tprocedure
     .input(
       z.object({
         name: z.string().min(2, "Name must be at least 2 characters"),
@@ -43,7 +43,7 @@ export const userRouter = router({
         });
       }
     }),
-  testUser: procedure.query(() => {
+  testUser: tprocedure.query(() => {
     return "Hi";
   }),
 }) satisfies any;

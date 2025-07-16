@@ -1,10 +1,10 @@
 import { userRouter } from "./routers/userRouter";
 import { projectRouter } from "./routers/projectRouter";
-import { router, procedure } from "./trpc";
+import { trouter } from "./trpc";
 
-export const appRouter = router({
+export const appRouter = trouter({
   user: userRouter,
-  projects: projectRouter,
+  projectsRouter : projectRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -1,9 +1,9 @@
 import { prisma, Prisma } from "@dev-planner/prisma";
-import { TRPCError, protectedProcedure, router } from "../trpc";
+import { TRPCError, protectedProcedure, trouter } from "../trpc";
 import { createProjectSchema } from "@dev-planner/schema";
 import { ProjectDetails, ProjectWithTypedDetails } from "../types";
 
-export const projectRouter = router({
+export const projectRouter = trouter({
   createProject: protectedProcedure
     .input(createProjectSchema)
     .mutation(async ({ input }) => {

@@ -37,7 +37,7 @@ export default function Signin() {
   const [isLoading, setIsLoading] = useState(false);
   const [token, setToken] = useState("");
   const router = useRouter();
-  const {data, error} = trpcReact.projects.testProject.useQuery();
+  const {data, error} = trpcReact.projectsRouter.testProject.useQuery();
   console.log('trpc', data, error)
 
   const registerUserMutation = trpcReact.user.registerUser.useMutation({
