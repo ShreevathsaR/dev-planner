@@ -39,6 +39,7 @@ export async function middleware(request: NextRequest) {
 
     return NextResponse.next();
   } catch (error) {
+    console.log('Error verifying token:', error);
     const response = NextResponse.redirect(new URL('/sign-in', request.url));
     response.cookies.delete('devplanner.session');
     return response;

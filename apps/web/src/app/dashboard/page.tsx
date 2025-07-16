@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { deleteCookie } from "@/lib/setSession";
 
-const page = () => {
+const Page = () => {
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -31,4 +31,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

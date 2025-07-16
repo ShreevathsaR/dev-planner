@@ -1,7 +1,7 @@
 import { adminAuth } from "@/lib/firebaseAdmin";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest, res:NextResponse) {
+export async function POST(req: NextRequest){
   const { token } = await req.json();
   console.log("Verifying Token....");
   try {
@@ -11,6 +11,7 @@ export async function POST(req: NextRequest, res:NextResponse) {
       { status: 200 }
     );
   } catch (error) {
+    console.log("Error verifying token:", error);
     return NextResponse.json(
       { success: false, error: "Invalid token" },
       { status: 401 }

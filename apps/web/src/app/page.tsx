@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-// Floating background element component
 const FloatingElement = ({ 
   size, 
   top, 
@@ -255,7 +254,7 @@ export default function LandingPage() {
               Ready to Transform Your Projects?
             </h3>
             <p className="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
-              Join thousands of teams who are already building better software with DevPlanner's intelligent project management platform.
+              Join thousands of teams who are already building better software with DevPlanner`&apos;`s intelligent project management platform.
             </p>
             <Button 
               size="lg" 

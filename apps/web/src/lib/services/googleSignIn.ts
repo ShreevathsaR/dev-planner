@@ -20,7 +20,7 @@ export const handleGoogleSignIn = async ({
     const response = await signInWithPopup(auth, provider);
 
     console.log("User", response.user);
-    const { getIdToken, uid, displayName, photoURL, email } = response.user;
+    const { uid, displayName, photoURL, email } = response.user;
 
     if (!uid || !displayName || !photoURL || !email) {
       toast.error("All the required parameters are missing");
