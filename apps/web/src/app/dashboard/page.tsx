@@ -16,7 +16,7 @@ const Page = () => {
     router.push("/sign-in");
   };
 
-  const {data, error} = trpcReact.projectsRouter.userProjects.useQuery();
+  const {data, error} = trpcReact.projectsRouter.getProjects.useQuery();
 
   console.log('projects test',data, error)
 
