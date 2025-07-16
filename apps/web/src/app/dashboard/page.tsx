@@ -4,6 +4,7 @@ import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { deleteCookie } from "@/lib/setSession";
+import { trpcReact } from "@dev-planner/trpc";
 
 const Page = () => {
   const router = useRouter();
@@ -14,6 +15,10 @@ const Page = () => {
     await deleteCookie();
     router.push("/sign-in");
   };
+
+  const {data, error} = trpcReact.projects.userProjects.useQuery();
+
+  console.log('projects test',data, error)
 
   return (
     <div className="flex flex-col items-center justify-center h-screen gap-4 bg-black text-white">

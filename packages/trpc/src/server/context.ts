@@ -1,6 +1,6 @@
 import { adminAuth } from "./firebase-admin";
 
-export async function createContext({ req }: { req: Request }) {
+export async function createTrpcContext({ req }: { req: Request }) {
   const token = req.headers.get('authorization')?.split("Bearer ")[1];
 
   let user = null;
@@ -19,4 +19,4 @@ export async function createContext({ req }: { req: Request }) {
   };
 }
 
-export type Context = Awaited<ReturnType<typeof createContext>>;
+export type ContextTRPC = Awaited<ReturnType<typeof createTrpcContext>>;
