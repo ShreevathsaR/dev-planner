@@ -65,7 +65,7 @@ const onSubmit = async (data: z.infer<typeof signInSchema>) => {
 
     if (!refreshedUser?.emailVerified) {
       Toast.show({
-        type: 'warning',
+        type: 'error',
         text1: 'Email Not Verified',
         text2: 'Please check your email and verify your account',
       });
