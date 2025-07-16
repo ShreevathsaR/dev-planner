@@ -30,7 +30,7 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { setSession } from "@/lib/setSession";
-import { trpcReact } from "@dev-planner/trpc";
+import { trpcReact } from "@dev-planner/trpc/client";
 import { handleGoogleSignIn } from "@/lib/services/googleSignIn";
 
 export default function Signin() {
