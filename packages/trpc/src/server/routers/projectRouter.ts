@@ -40,7 +40,7 @@ export const projectRouter = trouter({
         });
       }
     }),
-  userProjects: protectedProcedure.query(
+  getProjects: protectedProcedure.query(
     async ({
       ctx,
     }): Promise<{
