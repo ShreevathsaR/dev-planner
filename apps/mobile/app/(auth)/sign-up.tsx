@@ -20,9 +20,9 @@ import { HelloWave } from "@/components/HelloWave";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { signUpSchema } from "@dev-planner/schema";
+import { signUpSchema } from "../../schema";
 import { handleGoogleSignIn } from "@/lib/auth/googleSignIn";
-import { trpcReact } from "@dev-planner/trpc";
+import { trpcReact } from "../../trpc/client";
 import { getErrorMessage } from "@/lib/auth/errorMessages";
 import { auth } from "../_layout";
 

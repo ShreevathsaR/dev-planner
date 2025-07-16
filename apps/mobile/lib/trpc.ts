@@ -1,4 +1,4 @@
-import { AppRouterType, trpcReact } from "@dev-planner/trpc";
+import { AppRouterType, trpcReact } from "../trpc";
 import { createTRPCClient, httpLink } from "@trpc/client";
 import { QueryClient } from "@tanstack/react-query";
 import { auth } from "@/app/_layout";
