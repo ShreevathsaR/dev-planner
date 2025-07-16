@@ -21,8 +21,13 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
-    }
+      "@/*": ["./src/*"],
+      "@dev-planner/trpc": ["../../packages/trpc"],
+      "@dev-planner/trpc/server": ["../../packages/trpc/src/server"],
+      "@dev-planner/schema": ["../../packages/schema"],
+      "@dev-planner/prisma": ["../../packages/prisma"]
+    },
+    "baseUrl": "."
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
