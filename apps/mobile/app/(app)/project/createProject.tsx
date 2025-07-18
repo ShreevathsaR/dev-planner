@@ -12,7 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { navigate } from "expo-router/build/global-state/routing";
 import Toast from "react-native-toast-message";
 import { TextInput } from "react-native-gesture-handler";
-import { trpcReact } from "../../../trpc/client";
+import { trpcReact } from "@dev-planner/trpc/client";
 import { Controller, set, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createProjectSchema } from "../../../schema";

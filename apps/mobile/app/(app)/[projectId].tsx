@@ -16,6 +16,7 @@ import {
   StatusBar,
   Dimensions,
   Pressable,
+  ActivityIndicator,
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import Icon from "@expo/vector-icons/Feather";
@@ -29,14 +30,63 @@ import {
 import { useProjectsStore } from "@/lib/context/userStore";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import Feather from "@expo/vector-icons/Feather";
+import EventSource from "react-native-sse";
+import { ChatMessage } from "@/lib/types";
+import { trpcReact } from "@dev-planner/trpc";
+import { useProjectMessages } from "@/hooks/useProjectMessages";
 
 const { width } = Dimensions.get("window");
+
+const SERVER_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
 export default function Project() {
   const { projectId } = useLocalSearchParams();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["25%", "75%", "100%"], []);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const eventSourceRef = useRef<EventSource | null>(null);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const selectedProject = useProjectsStore((state) => state.selectedProject);
+
+  const { data: fetchedMessages } = useProjectMessages(projectId);
+
+  useEffect(() => {
+    if (fetchedMessages) {
+      setMessages(fetchedMessages.data);
+      scrollToBottom();
+    }
+  }, [fetchedMessages, selectedProject]);
+
+  // if (projectFetchingError) {
+  //   return (
+  //     <View
+  //       style={{
+  //         flex: 1,
+  //         justifyContent: "center",
+  //         alignItems: "center",
+  //         backgroundColor: "black",
+  //       }}
+  //     >
+  //       <Text style={{ color: "white" }}>Error fetching project</Text>
+  //     </View>
+  //   );
+  // }
+
+  // if (isFetching) {
+  //   return (
+  //     <View
+  //       style={{
+  //         flex: 1,
+  //         justifyContent: "center",
+  //         alignItems: "center",
+  //         backgroundColor: "black",
+  //       }}
+  //     >
+  //       <ActivityIndicator size="large" color="white" />
+  //       <Text style={{ color: "white" }}>Loading...</Text>
+  //     </View>
+  //   );
+  // }
 
   const handleSheetChanges = useCallback((index: number) => {
     console.log("Bottom sheet index:", index);
@@ -56,44 +106,253 @@ export default function Project() {
   const project = useProjectsStore((state) =>
     state.projects.find((project) => project.id === projectId)
   );
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      text: `Hello! I'm from ${project?.name}, your AI assistant. How can I help you today?`,
-      isUser: false,
-    },
-  ]);
+
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+
   const navigation = useNavigation();
   const [inputText, setInputText] = useState("");
   const scrollViewRef = useRef<ScrollView>(null);
   const insets = useSafeAreaInsets();
 
-  const handleSend = () => {
-    if (!inputText.trim()) return;
+  useEffect(() => {
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+    };
+  }, []);
 
-    const newMessage = { id: Date.now(), text: inputText.trim(), isUser: true };
-    setMessages((prev) => [...prev, newMessage]);
-    setInputText("");
-
-    // Scroll to bottom after adding user message
+  const scrollToBottom = useCallback(() => {
     setTimeout(() => {
       scrollViewRef.current?.scrollToEnd({ animated: true });
     }, 100);
+  }, []);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse = {
-        id: Date.now() + 1,
-        text: "I understand your message. This is a simulated AI response that would typically be generated based on your input.",
-        isUser: false,
-      };
-      setMessages((prev) => [...prev, aiResponse]);
+  const createMessage = trpcReact.projectsRouter.createMessage.useMutation({
+    onSuccess: (data) => {
+      if (data && data.success) {
+        const { data: userMessage } = data;
+        setMessages((prevMessages) => [...prevMessages, userMessage]);
 
-      // Scroll to bottom after AI response
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, 100);
-    }, 1200);
+        const currentMessage = userMessage;
+        setInputText("");
+        setIsStreaming(true);
+
+        const aiMessageId = new Date().toISOString();
+        const aiMessage = {
+          id: aiMessageId,
+          content: "",
+          role: "assistant",
+          createdAt: new Date().toISOString(),
+          projectId: projectId as string,
+          metadata: "",
+          isStreaming: true,
+        };
+
+        setMessages((prev) => [...prev, aiMessage]);
+        scrollToBottom();
+
+        try {
+
+          console.log("Sending message to server:", JSON.stringify({
+                message: currentMessage.content,
+                project,
+                messageHistory: messages
+                  .filter((message) => message.role === "user")
+                  .sort(
+                    (a, b) =>
+                      new Date(a.createdAt).getTime() -
+                      new Date(b.createdAt).getTime()
+                  )
+                  .slice(-5)
+                  .map((message) => ({
+                    role: message.role,
+                    content: message.content,
+                  })),
+              }));
+
+          eventSourceRef.current = new EventSource(
+            `${SERVER_URL}/api/ai-response`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                message: currentMessage.content,
+                project,
+                messageHistory: messages
+                  .filter((message) => message.role === "user")
+                  .sort(
+                    (a, b) =>
+                      new Date(a.createdAt).getTime() -
+                      new Date(b.createdAt).getTime()
+                  )
+                  .slice(-5)
+                  .map((message) => ({
+                    role: message.role,
+                    content: message.content,
+                  })),
+              }),
+            }
+          );
+
+          eventSourceRef.current.addEventListener("message", (event) => {
+            try {
+              console.log("Received event data:", event.data);
+              const data = JSON.parse(event.data as string);
+
+              switch (data.type) {
+                case "chunk":
+                  setMessages((prev) =>
+                    prev.map((msg) =>
+                      msg.id === aiMessageId
+                        ? { ...msg, content: msg.content + data.content }
+                        : msg
+                    )
+                  );
+                  scrollToBottom();
+                  break;
+
+                case "done":
+                  setMessages((prev) =>
+                    prev.map((msg) => {
+                      if(msg.id !== aiMessageId) return msg;
+
+                      const fullContent = msg.content;
+
+                      const decisionStart = fullContent.indexOf('### **Decisions**');
+                      let contentWithoutDecisions = fullContent;
+                      let decisionBlock: any[] = [];
+
+                      if (decisionStart !== -1) {
+                        contentWithoutDecisions = fullContent.slice(0, decisionStart).trim();
+                        const decisionJsonMatch = fullContent.match(/```json([\s\S]+?)```/);
+                        if(decisionJsonMatch){
+                          try{
+                            decisionBlock = JSON.parse(decisionJsonMatch[1]);
+                          } catch (error) {
+                            console.error("Error parsing JSON:", error);
+                          }
+                        }
+                      }
+
+                      if(decisionBlock.length > 0){
+                        console.log("Decision block:", decisionBlock);
+                      }
+
+                      return {
+                        ...msg,
+                        content: contentWithoutDecisions,
+                        isStreaming: false,
+                      }
+                    }
+                      
+                    )
+                  );
+                  setIsStreaming(false);
+                  if (eventSourceRef.current) {
+                    eventSourceRef.current.close();
+                    eventSourceRef.current = null;
+                  }
+                  break;
+
+                case "error":
+                  console.error("Streaming error:", data.message);
+                  setMessages((prev) =>
+                    prev.map((msg) =>
+                      msg.id === aiMessageId
+                        ? {
+                            ...msg,
+                            content:
+                              msg.content ||
+                              "Sorry, I encountered an error. Please try again.",
+                            isStreaming: false,
+                          }
+                        : msg
+                    )
+                  );
+                  setIsStreaming(false);
+                  if (eventSourceRef.current) {
+                    eventSourceRef.current.close();
+                    eventSourceRef.current = null;
+                  }
+                  break;
+              }
+            } catch (error) {
+              console.error("Error parsing SSE data:", error);
+            }
+          });
+
+          eventSourceRef.current.addEventListener("error", (error) => {
+            console.error("SSE connection error:", error);
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === aiMessageId
+                  ? {
+                      ...msg,
+                      content:
+                        msg.content || "Connection error. Please try again.",
+                      isStreaming: false,
+                    }
+                  : msg
+              )
+            );
+            setIsStreaming(false);
+            if (eventSourceRef.current) {
+              eventSourceRef.current.close();
+              eventSourceRef.current = null;
+            }
+          });
+        } catch (error) {
+          console.error("Error initiating stream:", error);
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === aiMessageId
+                ? {
+                    ...msg,
+                    content: "Failed to send message. Please try again.",
+                    isStreaming: false,
+                  }
+                : msg
+            )
+          );
+          setIsStreaming(false);
+        }
+      }
+    },
+    onError: (error) => {
+      console.error("Error creating message:", error);
+    },
+  });
+
+  const handleSend = async () => {
+    if (!inputText.trim() || isStreaming) return;
+    createMessage.mutate({
+      projectId: projectId as string,
+      content: inputText.trim(),
+    });
+  };
+
+  const stopStreaming = () => {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
+    }
+    setIsStreaming(false);
+
+    // Update the last streaming message to show it was stopped
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.isStreaming
+          ? {
+              ...msg,
+              text: msg.content + "\n\n[Response stopped]",
+              isStreaming: false,
+            }
+          : msg
+      )
+    );
   };
 
   return (
@@ -137,7 +396,7 @@ export default function Project() {
                 key={message.id}
                 style={[
                   styles.messageWrapper,
-                  message.isUser
+                  message.role == "user"
                     ? styles.userMessageWrapper
                     : styles.aiMessageWrapper,
                 ]}
@@ -145,19 +404,26 @@ export default function Project() {
                 <View
                   style={[
                     styles.messageBubble,
-                    message.isUser ? styles.userBubble : styles.aiBubble,
+                    message.role == "user"
+                      ? styles.userBubble
+                      : styles.aiBubble,
                   ]}
                 >
                   <Text
                     style={[
                       styles.messageText,
-                      message.isUser
+                      message.role == "user"
                         ? styles.userMessageText
                         : styles.aiMessageText,
                     ]}
                   >
-                    {message.text}
+                    {message.content}
                   </Text>
+                  {message.isStreaming && (
+                    <View style={styles.streamingIndicator}>
+                      <Text style={styles.streamingText}>●</Text>
+                    </View>
+                  )}
                 </View>
               </View>
             ))}
@@ -173,7 +439,7 @@ export default function Project() {
               <TextInput
                 value={inputText}
                 onChangeText={setInputText}
-                placeholder="Ask Grok anything..."
+                placeholder="Ask me anything..."
                 placeholderTextColor="#666666"
                 style={styles.input}
                 multiline
@@ -181,27 +447,37 @@ export default function Project() {
                 returnKeyType="send"
                 onSubmitEditing={handleSend}
                 blurOnSubmit={false}
+                editable={!isStreaming}
               />
-              <TouchableOpacity
-                onPress={handleSend}
-                style={[
-                  styles.sendButton,
-                  { opacity: inputText.trim() ? 1 : 0.5 },
-                ]}
-                disabled={!inputText.trim()}
-              >
-                <Icon
-                  name="send"
-                  size={20}
-                  color={inputText.trim() ? "#FFFFFF" : "#666666"}
-                />
-              </TouchableOpacity>
+              {isStreaming ? (
+                <TouchableOpacity
+                  onPress={stopStreaming}
+                  style={[styles.sendButton, styles.stopButton]}
+                >
+                  <Icon name="square" size={16} color="#FF3B30" />
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  onPress={handleSend}
+                  style={[
+                    styles.sendButton,
+                    { opacity: inputText.trim() ? 1 : 0.5 },
+                  ]}
+                  disabled={!inputText.trim()}
+                >
+                  <Icon
+                    name="send"
+                    size={20}
+                    color={inputText.trim() ? "#FFFFFF" : "#666666"}
+                  />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </KeyboardAvoidingView>
         <BottomSheet
           ref={bottomSheetRef}
-          index={-1} // Start closed
+          index={-1}
           snapPoints={snapPoints}
           onChange={handleSheetChanges}
           enablePanDownToClose
@@ -210,60 +486,65 @@ export default function Project() {
           animateOnMount={true}
         >
           <BottomSheetView style={styles.contentContainer}>
-            <View style={styles.sheetHeader}>
-              <Text style={styles.sheetTitle}>Project Details</Text>
-              <Pressable onPress={closeBottomSheet} style={styles.closeButton}>
-                <Feather name="x" size={24} color="white" />
-              </Pressable>
-            </View>
+            <ScrollView>
+              <View style={styles.sheetHeader}>
+                <Text style={styles.sheetTitle}>Project Details</Text>
+                <Pressable
+                  onPress={closeBottomSheet}
+                  style={styles.closeButton}
+                >
+                  <Feather name="x" size={24} color="white" />
+                </Pressable>
+              </View>
 
-            <Text style={styles.title}>{project?.name}</Text>
-            <Text style={styles.description}>{project?.description}</Text>
+              <Text style={styles.title}>{project?.name}</Text>
+              <Text style={styles.description}>{project?.description}</Text>
 
-            <View style={styles.detailsContent}>
-              <TextInput
-              style={styles.input}
-              placeholder="Enter your own context"
-              placeholderTextColor="#666666"
-              />
-            </View>
-
-            {project?.details && (
               <View style={styles.detailsContent}>
-                <View style={styles.detailItem}>
-                  <Text style={styles.sectionLabel}>Budget:</Text>
-                  <Text style={styles.sectionValue}>
-                    {project.details.budget?.toUpperCase()}
-                  </Text>
-                </View>
-                <View style={styles.detailItem}>
-                  <Text style={styles.sectionLabel}>Team Size:</Text>
-                  <Text style={styles.sectionValue}>
-                    ~{project.details.teamSize} members
-                  </Text>
-                </View>
-                <View style={styles.detailItem}>
-                  <Text style={styles.sectionLabel}>Timeline:</Text>
-                  <Text style={styles.sectionValue}>
-                    {project.details.timeline}
-                  </Text>
-                </View>
-                <View style={styles.detailItemSkills}>
-                  <Text style={styles.sectionLabel}>Skills</Text>
-                  <View style={styles.skillsContainer}>
-                    {project.details.skills?.map((skill, index) => (
-                      <Text key={index} style={styles.skillTag}>
-                        {skill}
-                      </Text>
-                    ))}
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your own context"
+                  placeholderTextColor="#666666"
+                />
+              </View>
+
+              {project?.details && (
+                <View style={styles.detailsContent}>
+                  <View style={styles.detailItem}>
+                    <Text style={styles.sectionLabel}>Budget:</Text>
+                    <Text style={styles.sectionValue}>
+                      {project.details.budget?.toUpperCase()}
+                    </Text>
+                  </View>
+                  <View style={styles.detailItem}>
+                    <Text style={styles.sectionLabel}>Team Size:</Text>
+                    <Text style={styles.sectionValue}>
+                      ~{project.details.teamSize} members
+                    </Text>
+                  </View>
+                  <View style={styles.detailItem}>
+                    <Text style={styles.sectionLabel}>Timeline:</Text>
+                    <Text style={styles.sectionValue}>
+                      {project.details.timeline}
+                    </Text>
+                  </View>
+                  <View style={styles.detailItemSkills}>
+                    <Text style={styles.sectionLabel}>Skills</Text>
+                    <View style={styles.skillsContainer}>
+                      {project.details.skills?.map((skill, index) => (
+                        <Text key={index} style={styles.skillTag}>
+                          {skill}
+                        </Text>
+                      ))}
+                    </View>
                   </View>
                 </View>
-              </View>
-            )}
+              )}
 
-            <Pressable onPress={closeBottomSheet} style={styles.backButton}>
-              <Text style={styles.backButtonText}>Close Details</Text>
-            </Pressable>
+              <Pressable onPress={closeBottomSheet} style={styles.backButton}>
+                <Text style={styles.backButtonText}>Close Details</Text>
+              </Pressable>
+            </ScrollView>
           </BottomSheetView>
         </BottomSheet>
       </View>
@@ -315,6 +596,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
     elevation: 2,
+    position: "relative",
   },
   userBubble: {
     backgroundColor: "#FFFFFF",
@@ -338,6 +620,16 @@ const styles = StyleSheet.create({
   },
   aiMessageText: {
     color: "#FFFFFF",
+  },
+  streamingIndicator: {
+    position: "absolute",
+    bottom: 8,
+    right: 12,
+  },
+  streamingText: {
+    color: "#007AFF",
+    fontSize: 12,
+    fontWeight: "bold",
   },
   inputContainer: {
     backgroundColor: "#000000",
@@ -375,6 +667,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginLeft: 8,
+  },
+  stopButton: {
+    backgroundColor: "#FF3B30",
   },
   backButton: {
     alignSelf: "center",

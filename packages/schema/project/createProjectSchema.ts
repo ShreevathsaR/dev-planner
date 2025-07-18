@@ -12,4 +12,9 @@ export const createProjectSchema = z.object({
   }).optional(),
 });
 
+export const createMessageSchema = z.object({
+  projectId: z.string().min(1, 'Project id should not be empty'),
+  content: z.string().min(1, 'Message should not be empty'),
+});
+
 export type CreateProjectSchemaType = typeof createProjectSchema;

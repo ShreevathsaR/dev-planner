@@ -18,7 +18,7 @@ import { Image } from "expo-image";
 import { useAuth } from "@/lib/hooks/useAuth";
 import Feather from "@expo/vector-icons/Feather";
 import { useProjectsStore } from "@/lib/context/userStore";
-import { trpcReact } from "../../trpc/client";
+import { trpcReact } from "@dev-planner/trpc/client";
 import { useEffect } from "react";
 
 export default function DrawerLayout() {
@@ -34,7 +34,7 @@ export default function DrawerLayout() {
     data: userProjects,
     error: projectFetchingError,
     isFetching,
-  } = trpcReact.projects.userProjects.useQuery();
+  } = trpcReact.projectsRouter.getProjects.useQuery();
   console.log(userProjects?.message);
 
   useEffect(() => {

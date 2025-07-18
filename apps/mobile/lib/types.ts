@@ -34,3 +34,13 @@ export interface ProjectsStore {
   selectedProject: Project | null;
   addProject: (project: Project) => void;
 }
+
+export interface ChatMessage {
+  id: string;
+  content: string;
+  role: string;
+  projectId: string;
+  createdAt: string;    
+  metadata: string | null;
+  isStreaming?: boolean;
+}

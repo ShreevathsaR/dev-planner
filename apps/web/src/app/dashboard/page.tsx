@@ -4,7 +4,7 @@ import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { deleteCookie } from "@/lib/setSession";
-import { trpcReact } from "@dev-planner/trpc";
+import { trpcReact } from "@dev-planner/trpc/client";
 
 const Page = () => {
   const router = useRouter();

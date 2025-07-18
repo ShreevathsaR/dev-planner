@@ -11,7 +11,7 @@ import Toast from "react-native-toast-message";
 import MultiSelect from "react-native-multiple-select";
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { createProjectType } from "@/lib/types";
-import { trpcReact } from "../../../trpc/client";
+import { trpcReact } from "@dev-planner/trpc/client";
 import { useProjectsStore } from "@/lib/context/userStore";
 import Feather from "@expo/vector-icons/Feather";
 
@@ -33,7 +33,7 @@ export default function MoreProjectDetails() {
   const selectedProject = useProjectsStore((state) => state.selectedProject);
   const addProject = useProjectsStore((state) => state.addProject);
 
-  const createProject = trpcReact.projects.createProject.useMutation({
+  const createProject = trpcReact.projectsRouter.createProject.useMutation({
     onSuccess: async ({ data }: any) => {
       addProject(data);
       setSelectedProject(data);

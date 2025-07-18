@@ -1,5 +1,5 @@
 import { auth } from "@/app/_layout";
-import { trpcReact } from "../../trpc/client";
+import { trpcReact } from "@dev-planner/trpc/client";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import Toast from "react-native-toast-message";

@@ -1,7 +1,8 @@
 import { prisma, Prisma } from "@dev-planner/prisma";
 import { TRPCError, protectedProcedure, trouter } from "../trpc";
-import { createProjectSchema } from "@dev-planner/schema";
+import { createProjectSchema, createMessageSchema } from "@dev-planner/schema";
 import { ProjectDetails, ProjectWithTypedDetails } from "../types";
+import * as z from "zod";
 
 export const projectRouter = trouter({
   createProject: protectedProcedure
@@ -86,6 +87,68 @@ export const projectRouter = trouter({
       }
     }
   ),
+  createMessage: protectedProcedure
+    .input(createMessageSchema)
+    .mutation(async ({ input }) => {
+      const { content, projectId } = input;
+
+      try {
+        const message = await prisma.chatMessage.create({
+          data: {
+            content,
+            projectId,
+            role: "user",
+          },
+        });
+
+        return {
+          success: true,
+          message: `Message created successfully`,
+          data: message,
+        };
+      } catch (error) {
+        console.log(error);
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+          throw new TRPCError({
+            code: "NOT_IMPLEMENTED",
+            message: "Failed creating message",
+          });
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Internal server error",
+          cause: error,
+        });
+      }
+  }),
+  getMessages: protectedProcedure.input(z.object({ projectId: z.string()})).query(async ({ input }) => {
+    const { projectId } = input;
+    try {
+      const messages = await prisma.chatMessage.findMany({
+        where: {
+          projectId,
+        },
+      });
+      return {
+        success: true,
+        message: `Messages fetched successfully`,
+        data: messages,
+      };
+    } catch (error) {
+      console.log(error);
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new TRPCError({
+          code: "NOT_IMPLEMENTED",
+          message: "Failed fetching messages",
+        });
+      }
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Internal server error",
+        cause: error,
+      });
+    }
+  }),
   testProject: protectedProcedure.query(({ ctx }) => {
     return `Hello ${ctx.user?.email}`;
   }),

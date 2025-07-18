@@ -22,7 +22,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { signUpSchema } from "../../schema";
 import { handleGoogleSignIn } from "@/lib/auth/googleSignIn";
-import { trpcReact } from "../../trpc/client";
+import { trpcReact } from "@dev-planner/trpc/client";
 import { getErrorMessage } from "@/lib/auth/errorMessages";
 import { auth } from "../_layout";
 
