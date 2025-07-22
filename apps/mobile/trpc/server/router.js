@@ -1,7 +1,7 @@
 import { userRouter } from "./routers/userRouter";
 import { projectRouter } from "./routers/projectRouter";
-import { router } from "./trpc";
-export const appRouter = router({
+import { trouter } from "./trpc";
+export const appRouter = trouter({
     user: userRouter,
-    projects: projectRouter,
+    projectsRouter: projectRouter,
 });

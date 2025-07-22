@@ -8,21 +8,21 @@ export declare const userRouter: import("@trpc/server").TRPCBuiltRouter<{
 }, import("@trpc/server").TRPCDecorateCreateRouterOptions<{
     registerUser: import("@trpc/server").TRPCMutationProcedure<{
         input: {
+            id: string;
             name: string;
             email: string;
             image: string;
-            id: string;
         };
         output: {
             success: boolean;
             message: string;
             user: {
-                name: string;
-                email: string;
-                image: string | null;
                 id: string;
+                name: string;
                 createdAt: Date;
                 updatedAt: Date;
+                email: string;
+                image: string | null;
             };
         };
         meta: object;

@@ -8,16 +8,30 @@
       "developmentClient": true,
       "distribution": "internal"
     },
-    "preview": {
+"preview": {
       "distribution": "internal",
       "env": {
-        "NODE_ENV": "production"
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "710907599444-tulnu86m0um0s0g2gffb090v07u7jp6d.apps.googleusercontent.com",
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyDWsE0B9Fg57-FABkUnSC4512-BDlTCuN8",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "dev-pla.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "dev-pla",
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "dev-pla.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "710907599444",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:710907599444:android:9cb6717db518643ba9ebc1",
+        "EXPO_PUBLIC_BASE_URL": "https://devplanner.vathsa.site"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "NODE_ENV": "production"
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "710907599444-tulnu86m0um0s0g2gffb090v07u7jp6d.apps.googleusercontent.com",
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyDWsE0B9Fg57-FABkUnSC4512-BDlTCuN8",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "dev-pla.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "dev-pla",
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "dev-pla.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "710907599444",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:710907599444:android:9cb6717db518643ba9ebc1",
+        "EXPO_PUBLIC_BASE_URL": "https://devplanner.vathsa.site"
       }
     }
   },

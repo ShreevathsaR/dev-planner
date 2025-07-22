@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-export declare const router: import("@trpc/server").TRPCRouterBuilder<{
+export declare const trouter: import("@trpc/server").TRPCRouterBuilder<{
     ctx: {
         user: any;
     };
@@ -7,7 +7,7 @@ export declare const router: import("@trpc/server").TRPCRouterBuilder<{
     errorShape: import("@trpc/server").TRPCDefaultErrorShape;
     transformer: false;
 }>;
-export declare const procedure: import("@trpc/server").TRPCProcedureBuilder<{
+export declare const tprocedure: import("@trpc/server").TRPCProcedureBuilder<{
     user: any;
 }, object, object, import("@trpc/server").TRPCUnsetMarker, import("@trpc/server").TRPCUnsetMarker, import("@trpc/server").TRPCUnsetMarker, import("@trpc/server").TRPCUnsetMarker, false>;
 export declare const protectedProcedure: import("@trpc/server").TRPCProcedureBuilder<{

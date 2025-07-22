@@ -32,7 +32,7 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import Feather from "@expo/vector-icons/Feather";
 import EventSource from "react-native-sse";
 import { ChatMessage, DecisionType } from "@/lib/types";
-import { trpcReact } from "@dev-planner/trpc";
+import { trpcReact } from "../../trpc";
 import { useProjectMessages } from "@/hooks/useProjectMessages";
 import DecisionsSheet from "@/components/DecisionsSheet";
 
@@ -99,6 +99,9 @@ export default function Project() {
         };
       });
       setMessages(alteredMessages);
+      setTimeout(() => {
+        scrollToBottom();
+      }, 200);
       scrollToBottom();
     }
   }, [fetchedMessages, selectedProject]);

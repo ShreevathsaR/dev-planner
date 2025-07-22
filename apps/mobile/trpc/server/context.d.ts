@@ -1,6 +1,6 @@
-export declare function createContext({ req }: {
+export declare function createTrpcContext({ req }: {
     req: Request;
 }): Promise<{
     user: any;
 }>;
-export type Context = Awaited<ReturnType<typeof createContext>>;
+export type ContextTRPC = Awaited<ReturnType<typeof createTrpcContext>>;

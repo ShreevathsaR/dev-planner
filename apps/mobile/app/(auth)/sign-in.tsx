@@ -22,7 +22,7 @@ import { Controller, set, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { signInSchema } from "../../schema";
-import { trpcReact } from "@dev-planner/trpc/client";
+import { trpcReact } from "../../trpc/client";
 import { handleGoogleSignIn } from "@/lib/auth/googleSignIn";
 import { sendVerificationEmail } from "@/lib/auth/sendVerificationEmail";
 import {auth} from '../_layout'; 

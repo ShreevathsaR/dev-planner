@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createProjectSchema = void 0;
+exports.createMessageSchema = exports.createProjectSchema = void 0;
 const z = __importStar(require("zod"));
 exports.createProjectSchema = z.object({
     name: z.string().min(4, 'Project name should contain atleast 4 characters').max(30, 'Project name should contain atmost 30 characters'),
@@ -45,4 +45,8 @@ exports.createProjectSchema = z.object({
         budget: z.enum(['low', 'medium', 'high']).optional(),
         timeline: z.string().optional(),
     }).optional(),
+});
+exports.createMessageSchema = z.object({
+    projectId: z.string().min(1, 'Project id should not be empty'),
+    content: z.string().min(1, 'Message should not be empty'),
 });

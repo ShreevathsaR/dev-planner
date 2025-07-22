@@ -11,7 +11,7 @@ import Toast from "react-native-toast-message";
 import MultiSelect from "react-native-multiple-select";
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { createProjectType } from "@/lib/types";
-import { trpcReact } from "@dev-planner/trpc/client";
+import { trpcReact } from "../../../trpc/client";
 import { useProjectsStore } from "@/lib/context/userStore";
 import Feather from "@expo/vector-icons/Feather";
 

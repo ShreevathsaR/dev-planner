@@ -40,4 +40,14 @@ export declare const createProjectSchema: z.ZodObject<{
         timeline?: string | undefined;
     } | undefined;
 }>;
+export declare const createMessageSchema: z.ZodObject<{
+    projectId: z.ZodString;
+    content: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    projectId: string;
+    content: string;
+}, {
+    projectId: string;
+    content: string;
+}>;
 export type CreateProjectSchemaType = typeof createProjectSchema;
