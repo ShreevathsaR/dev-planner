@@ -1,4 +1,4 @@
-import { trpcReact } from "@dev-planner/trpc";
+import { trpcReact } from "../../trpc";
 import { httpLink } from "@trpc/client";
 import { QueryClient } from "@tanstack/react-query";
 import { auth } from "./firebase";

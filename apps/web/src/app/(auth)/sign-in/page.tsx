@@ -16,7 +16,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { signInSchema, SignInFormType } from "@dev-planner/schema";
+import { signInSchema, SignInFormType } from "../../../../schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -30,7 +30,7 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { setSession } from "@/lib/setSession";
-import { trpcReact } from "@dev-planner/trpc";
+import { trpcReact } from "../../../../trpc";
 import { handleGoogleSignIn } from "@/lib/services/googleSignIn";
 
 export default function Signin() {

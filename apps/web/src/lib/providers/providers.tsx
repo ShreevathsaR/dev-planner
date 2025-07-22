@@ -1,5 +1,5 @@
 "use client"
-import { trpcReact } from "@dev-planner/trpc";
+import { trpcReact } from "../../../trpc";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { trpc, queryClient } from "@/lib/trpc";
 

@@ -1,4 +1,3 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleGenAI } from "@google/genai";
 import { prisma } from "@dev-planner/prisma";
 import { NextRequest } from "next/server";
@@ -26,6 +25,15 @@ const AIRequestSchema = z.object({
       role: z.string(),
     })
   ),
+  previousDecisions: z.array(
+    z.object({
+      category: z.string(),
+      key: z.string(),
+      value: z.string(),
+      reason: z.string(),
+      confidence_score: z.number().min(0).max(1),
+    })
+  )
 });
 
 export async function POST(request: NextRequest) {
@@ -37,9 +45,8 @@ export async function POST(request: NextRequest) {
   }
 
   
-  const { project, message, messageHistory } = parseResult.data;
+  const { project, message, messageHistory, previousDecisions } = parseResult.data;
 
-  const previousDecisions = '';
   const previousMessages = messageHistory.map((message) => {
       return message.content;
   });
@@ -90,6 +97,8 @@ YOUR RESPONSE FORMAT:
 This section will contain a list of decisions made by you in the following format. Each decision will have the following structure put all decisions in a JSON array.
 - {
   "category": "technology_category(like frontend, backend, database, architecture etc.)",
+  "key": "decision_key",
+  "value": "decision_value",
   "reason": "reason_for_decision",
   "confidence_score: "0 to 1",
   "recommendation": "recommendation_for_decision"

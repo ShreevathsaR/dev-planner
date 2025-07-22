@@ -40,7 +40,16 @@ export interface ChatMessage {
   content: string;
   role: string;
   projectId: string;
-  createdAt: string;    
+  createdAt: string;
   metadata: string | null;
   isStreaming?: boolean;
+}
+
+export interface DecisionType {
+  value: string;
+  category: string;
+  key: string;
+  reason: string;
+  confidence_score: number;
+  recommendation: string;
 }

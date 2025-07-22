@@ -31,9 +31,10 @@ import { useProjectsStore } from "@/lib/context/userStore";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import Feather from "@expo/vector-icons/Feather";
 import EventSource from "react-native-sse";
-import { ChatMessage } from "@/lib/types";
+import { ChatMessage, DecisionType } from "@/lib/types";
 import { trpcReact } from "@dev-planner/trpc";
 import { useProjectMessages } from "@/hooks/useProjectMessages";
+import DecisionsSheet from "@/components/DecisionsSheet";
 
 const { width } = Dimensions.get("window");
 
@@ -42,17 +43,62 @@ const SERVER_URL = process.env.EXPO_PUBLIC_BASE_URL;
 export default function Project() {
   const { projectId } = useLocalSearchParams();
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const decisionsBottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["25%", "75%", "100%"], []);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isDecisionSheetOpen, setIsDecisionSheetOpen] = useState(false);
   const eventSourceRef = useRef<EventSource | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const selectedProject = useProjectsStore((state) => state.selectedProject);
 
   const { data: fetchedMessages } = useProjectMessages(projectId);
 
+  const {data: decisions, error: decisionsError, isFetching: isDecisionsFetching, refetch: decisionRefetch} = trpcReact.projectsRouter.getDecisions.useQuery(
+    {
+      projectId: projectId as string,
+    },
+    {
+      staleTime: 1000 * 60 * 1, 
+    }
+  );
+
+  const updateDecisions =
+    trpcReact.projectsRouter.updateProjectDecisions.useMutation({
+      onSuccess: (data) => {
+        if (data && data.success) {
+          console.log("Decisions updated successfully");
+        } else {
+          console.error("Failed to update decisions:", data);
+        }
+      },
+      onError: (error) => {
+        console.error("Error updating decisions:", error);
+      },
+    });
+
   useEffect(() => {
     if (fetchedMessages) {
-      setMessages(fetchedMessages.data);
+      const alteredMessages = fetchedMessages.data.map((msg) => {
+        const fullContent = msg.content;
+        const decisionStart = fullContent.indexOf("### **Decisions**");
+        let contentWithoutDecisions = fullContent;
+
+        if (decisionStart !== -1) {
+          contentWithoutDecisions = fullContent.slice(0, decisionStart).trim();
+        }
+
+        contentWithoutDecisions = contentWithoutDecisions
+          .split("\n")
+          .filter((line) => !line.trim().startsWith("### **Response**"))
+          .join("\n")
+          .trim();
+
+        return {
+          ...msg,
+          content: contentWithoutDecisions,
+        };
+      });
+      setMessages(alteredMessages);
       scrollToBottom();
     }
   }, [fetchedMessages, selectedProject]);
@@ -92,13 +138,31 @@ export default function Project() {
     console.log("Bottom sheet index:", index);
     setIsSheetOpen(index !== -1);
   }, []);
+  const handleDecisionSheetChanges = useCallback((index: number) => {
+    console.log("Bottom sheet index:", index);
+    setIsDecisionSheetOpen(index !== -1);
+  }, []);
 
-  const openBottomSheet = () => {
+  const openBottomSheet = (type: "details" | "decisions") => {
+    if (type === "decisions") {
+      setIsSheetOpen(false);
+      bottomSheetRef.current?.close();
+      decisionsBottomSheetRef.current?.snapToIndex(2);
+      setIsDecisionSheetOpen(true);
+      return;
+    }
+    setIsDecisionSheetOpen(false);
+    decisionsBottomSheetRef.current?.close();
     bottomSheetRef.current?.snapToIndex(1);
     setIsSheetOpen(true);
   };
 
-  const closeBottomSheet = () => {
+  const closeBottomSheet = (type: "details" | "decisions") => {
+    if (type === "decisions") {
+      decisionsBottomSheetRef.current?.close();
+      setIsDecisionSheetOpen(false);
+      return;
+    }
     bottomSheetRef.current?.close();
     setIsSheetOpen(false);
   };
@@ -109,7 +173,6 @@ export default function Project() {
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
-  const navigation = useNavigation();
   const [inputText, setInputText] = useState("");
   const scrollViewRef = useRef<ScrollView>(null);
   const insets = useSafeAreaInsets();
@@ -153,23 +216,25 @@ export default function Project() {
         scrollToBottom();
 
         try {
-
-          console.log("Sending message to server:", JSON.stringify({
-                message: currentMessage.content,
-                project,
-                messageHistory: messages
-                  .filter((message) => message.role === "user")
-                  .sort(
-                    (a, b) =>
-                      new Date(a.createdAt).getTime() -
-                      new Date(b.createdAt).getTime()
-                  )
-                  .slice(-5)
-                  .map((message) => ({
-                    role: message.role,
-                    content: message.content,
-                  })),
-              }));
+          console.log(
+            "Sending message to server:",
+            JSON.stringify({
+              message: currentMessage.content,
+              project,
+              messageHistory: messages
+                .filter((message) => message.role === "user")
+                .sort(
+                  (a, b) =>
+                    new Date(a.createdAt).getTime() -
+                    new Date(b.createdAt).getTime()
+                )
+                .slice(-5)
+                .map((message) => ({
+                  role: message.role,
+                  content: message.content,
+                })),
+            })
+          );
 
           eventSourceRef.current = new EventSource(
             `${SERVER_URL}/api/ai-response`,
@@ -193,6 +258,15 @@ export default function Project() {
                     role: message.role,
                     content: message.content,
                   })),
+                previousDecisions: decisions?.data.map((decision) => {
+                  return {
+                    category : decision.category,
+                    key: decision.key,
+                    value: decision.value,
+                    reason: decision.reason,
+                    confidence_score: decision.confidence_score,
+                  }
+                }),
               }),
             }
           );
@@ -217,19 +291,23 @@ export default function Project() {
                 case "done":
                   setMessages((prev) =>
                     prev.map((msg) => {
-                      if(msg.id !== aiMessageId) return msg;
+                      if (msg.id !== aiMessageId) return msg;
 
                       const fullContent = msg.content;
 
-                      const decisionStart = fullContent.indexOf('### **Decisions**');
+                      const decisionStart =
+                        fullContent.indexOf("### **Decisions**");
                       let contentWithoutDecisions = fullContent;
-                      let decisionBlock: any[] = [];
+                      let decisionBlock: DecisionType[] = [];
 
                       if (decisionStart !== -1) {
-                        contentWithoutDecisions = fullContent.slice(0, decisionStart).trim();
-                        const decisionJsonMatch = fullContent.match(/```json([\s\S]+?)```/);
-                        if(decisionJsonMatch){
-                          try{
+                        contentWithoutDecisions = fullContent
+                          .slice(0, decisionStart)
+                          .trim();
+                        const decisionJsonMatch =
+                          fullContent.match(/```json([\s\S]+?)```/);
+                        if (decisionJsonMatch) {
+                          try {
                             decisionBlock = JSON.parse(decisionJsonMatch[1]);
                           } catch (error) {
                             console.error("Error parsing JSON:", error);
@@ -237,24 +315,46 @@ export default function Project() {
                         }
                       }
 
-                      if(decisionBlock.length > 0){
+                      contentWithoutDecisions = contentWithoutDecisions
+                        .split("\n")
+                        .filter(
+                          (line) => !line.trim().startsWith("### **Response**")
+                        )
+                        .join("\n")
+                        .trim();
+
+                      if (decisionBlock.length > 0) {
                         console.log("Decision block:", decisionBlock);
+                        if (project) {
+                          updateDecisions.mutate({
+                            projectId: project.id,
+                            decisions: decisionBlock.map((decision) => ({
+                              category: decision.category,
+                              key: decision.key,
+                              value: decision.value,
+                              reason: decision.reason,
+                              confidence_score: Number(
+                                decision.confidence_score
+                              ),
+                              recommendation: decision.recommendation,
+                            })),
+                          });
+                        }
                       }
 
                       return {
                         ...msg,
                         content: contentWithoutDecisions,
                         isStreaming: false,
-                      }
-                    }
-                      
-                    )
+                      };
+                    })
                   );
                   setIsStreaming(false);
                   if (eventSourceRef.current) {
                     eventSourceRef.current.close();
                     eventSourceRef.current = null;
                   }
+                  decisionRefetch();
                   break;
 
                 case "error":
@@ -328,6 +428,7 @@ export default function Project() {
 
   const handleSend = async () => {
     if (!inputText.trim() || isStreaming) return;
+    setIsStreaming(true);
     createMessage.mutate({
       projectId: projectId as string,
       content: inputText.trim(),
@@ -341,7 +442,6 @@ export default function Project() {
     }
     setIsStreaming(false);
 
-    // Update the last streaming message to show it was stopped
     setMessages((prev) =>
       prev.map((msg) =>
         msg.isStreaming
@@ -365,12 +465,20 @@ export default function Project() {
             headerTitle: `${project?.name}`,
             headerTitleAlign: "left",
             headerRight: () => (
-              <TouchableOpacity
-                onPress={openBottomSheet}
-                style={{ marginRight: 16 }}
-              >
-                <Icon name="info" size={24} color="white" />
-              </TouchableOpacity>
+              <View style={{ flexDirection: "row", gap: 10 }}>
+                <TouchableOpacity
+                  onPress={() => openBottomSheet("decisions")}
+                  style={{ marginRight: 16 }}
+                >
+                  <Icon name="edit" size={24} color="white" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => openBottomSheet("details")}
+                  style={{ marginRight: 16 }}
+                >
+                  <Icon name="info" size={24} color="white" />
+                </TouchableOpacity>
+              </View>
             ),
           }}
         />
@@ -490,7 +598,7 @@ export default function Project() {
               <View style={styles.sheetHeader}>
                 <Text style={styles.sheetTitle}>Project Details</Text>
                 <Pressable
-                  onPress={closeBottomSheet}
+                  onPress={() => closeBottomSheet("details")}
                   style={styles.closeButton}
                 >
                   <Feather name="x" size={24} color="white" />
@@ -541,12 +649,27 @@ export default function Project() {
                 </View>
               )}
 
-              <Pressable onPress={closeBottomSheet} style={styles.backButton}>
+              <Pressable
+                onPress={() => closeBottomSheet("details")}
+                style={styles.backButton}
+              >
                 <Text style={styles.backButtonText}>Close Details</Text>
               </Pressable>
             </ScrollView>
           </BottomSheetView>
         </BottomSheet>
+        {project && <BottomSheet
+          ref={decisionsBottomSheetRef}
+          index={-1}
+          snapPoints={snapPoints}
+          onChange={handleDecisionSheetChanges}
+          enablePanDownToClose
+          backgroundStyle={styles.sheetBackground}
+          handleIndicatorStyle={styles.handleIndicator}
+          animateOnMount={true}
+        >
+          <DecisionsSheet {...{ closeBottomSheet, decisions, isDecisionsFetching, decisionsError, projectName: project.name, decisionRefetch }} />
+        </BottomSheet>}
       </View>
     </>
   );

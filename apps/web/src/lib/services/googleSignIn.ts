@@ -1,7 +1,7 @@
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { toast } from "sonner";
 import { auth } from "../firebase";
-import { trpcReact } from "@dev-planner/trpc";
+import { trpcReact } from "../../../trpc";
 
 interface GoogleSignInType {
   setIsLoading: (loading: boolean) => void;

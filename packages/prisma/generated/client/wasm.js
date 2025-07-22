@@ -148,6 +148,19 @@ exports.Prisma.ChatMessageScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.DecisionScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  category: 'category',
+  key: 'key',
+  value: 'value',
+  confidence_score: 'confidence_score',
+  reason: 'reason',
+  recommendation: 'recommendation',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -178,7 +191,8 @@ exports.Prisma.JsonNullValueFilter = {
 exports.Prisma.ModelName = {
   User: 'User',
   Project: 'Project',
-  ChatMessage: 'ChatMessage'
+  ChatMessage: 'ChatMessage',
+  Decision: 'Decision'
 };
 
 /**

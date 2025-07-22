@@ -120,35 +120,138 @@ export const projectRouter = trouter({
           cause: error,
         });
       }
-  }),
-  getMessages: protectedProcedure.input(z.object({ projectId: z.string()})).query(async ({ input }) => {
-    const { projectId } = input;
-    try {
-      const messages = await prisma.chatMessage.findMany({
-        where: {
-          projectId,
-        },
-      });
-      return {
-        success: true,
-        message: `Messages fetched successfully`,
-        data: messages,
-      };
-    } catch (error) {
-      console.log(error);
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    }),
+  getMessages: protectedProcedure
+    .input(z.object({ projectId: z.string() }))
+    .query(async ({ input }) => {
+      const { projectId } = input;
+      try {
+        const messages = await prisma.chatMessage.findMany({
+          where: {
+            projectId,
+          },
+        });
+        return {
+          success: true,
+          message: `Messages fetched successfully`,
+          data: messages,
+        };
+      } catch (error) {
+        console.log(error);
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+          throw new TRPCError({
+            code: "NOT_IMPLEMENTED",
+            message: "Failed fetching messages",
+          });
+        }
         throw new TRPCError({
-          code: "NOT_IMPLEMENTED",
-          message: "Failed fetching messages",
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Internal server error",
+          cause: error,
         });
       }
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Internal server error",
-        cause: error,
-      });
-    }
-  }),
+    }),
+  updateProjectDecisions: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+        decisions: z.array(
+          z.object({
+            category: z.string(),
+            key: z.string(),
+            value: z.string(),
+            reason: z.string(),
+            confidence_score: z.number().min(0).max(1),
+            recommendation: z.string(),
+          })
+        ),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { projectId, decisions } = input;
+
+      console.log("Decisions", decisions);
+
+      try {
+        await Promise.all(
+          decisions.map((decision) =>
+            prisma.decision.upsert({
+              where: {
+                projectId_category_key: {
+                  projectId,
+                  category: decision.category,
+                  key: decision.key,
+                },
+              },
+              update: {
+                key: decision.key,
+                value: decision.value,
+                reason: decision.reason,
+                confidence_score: decision.confidence_score,
+                recommendation: decision.recommendation,
+              },
+              create: {
+                projectId,
+                category: decision.category,
+                key: decision.key,
+                value: decision.value,
+                reason: decision.reason,
+                confidence_score: decision.confidence_score,
+                recommendation: decision.recommendation,
+              },
+            })
+          )
+        );
+
+        return {
+          success: true,
+          message: "Project decisions updated successfully",
+        };
+      } catch (error) {
+        console.log(error);
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+          throw new TRPCError({
+            code: "NOT_IMPLEMENTED",
+            message: "Failed updating project decisions",
+          });
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Internal server error",
+          cause: error,
+        });
+      }
+    }),
+  getDecisions: protectedProcedure
+    .input(z.object({ projectId: z.string() }))
+    .query(async ({ input }) => {
+      const { projectId } = input;
+      try {
+        const decisions = await prisma.decision.findMany({
+          where: {
+            projectId,
+          },
+        });
+        return {
+          success: true,
+          message: "Project decisions fetched successfully",
+          data: decisions,
+        };
+      } catch (error) {
+        console.log(error);
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+          throw new TRPCError({
+            code: "NOT_IMPLEMENTED",
+            message: "Failed fetching project decisions",
+          });
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Internal server error",
+          cause: error,
+        });
+      }
+    }),
   testProject: protectedProcedure.query(({ ctx }) => {
     return `Hello ${ctx.user?.email}`;
   }),

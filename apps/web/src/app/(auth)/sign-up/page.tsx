@@ -16,7 +16,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { signUpSchema, SignUpFormType } from "@dev-planner/schema";
+import { signUpSchema, SignUpFormType } from "../../../../schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -32,7 +32,7 @@ import {
 import { auth } from "@/lib/firebase";
 import { setSession } from "@/lib/setSession";
 import { handleGoogleSignIn } from "@/lib/services/googleSignIn";
-import { trpcReact } from "@dev-planner/trpc";
+import { trpcReact } from "../../../../trpc";
 
 export default function Signup() {
   const [isLoading, setIsLoading] = useState(false);

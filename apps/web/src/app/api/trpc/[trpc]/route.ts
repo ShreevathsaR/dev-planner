@@ -1,5 +1,5 @@
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
-import { appRouter,createTrpcContext } from '@dev-planner/trpc/server';
+import { appRouter,createTrpcContext } from '../../../../../trpc/server';
 
 export const config = {
   api: {
