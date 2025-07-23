@@ -1,4 +1,4 @@
-import { trpcReact } from "../trpc/client";
+import { trpcReact } from "../trpc";
 
 export function useProjectMessages(projectId: string | string[] | undefined) {
   const enabled = typeof projectId === "string" && projectId.length > 0;
