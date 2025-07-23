@@ -139,7 +139,12 @@ This section will contain a list of decisions made by you in the following forma
 
         try {
           const cached = await redis.get(redisKey);
-          const parsed = cached ? JSON.parse(cached) : [];
+          let parsed;
+          if (cached && typeof cached === "string") {
+            parsed = JSON.parse(cached);
+          } else {
+            parsed = [];
+          }
           await redis.setex(
             redisKey,
             3600,
