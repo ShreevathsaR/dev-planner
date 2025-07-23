@@ -2,7 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { prisma } from "@dev-planner/prisma";
 import { NextRequest } from "next/server";
 import * as z from "zod";
-import { redis } from "trpc/server";
+import { redis } from "../../../../trpc/server";
 
 const AIRequestSchema = z.object({
   message: z.string().min(1, "Message is required"),
