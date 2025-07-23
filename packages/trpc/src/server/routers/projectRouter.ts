@@ -110,7 +110,12 @@ export const projectRouter = trouter({
 
         try {
           const cached = await redis.get(redisKey);
-          const parsed = cached ? JSON.parse(cached) : [];
+          let parsed;
+          if (cached && typeof cached === "string") {
+            parsed = JSON.parse(cached);
+          } else {
+            parsed = [];
+          }
           await redis.setex(
             redisKey,
             3600,
@@ -147,21 +152,21 @@ export const projectRouter = trouter({
 
       const redisKey = `${projectId}-messages`;
 
-      // try {
-      //   const cached = await redis.get(redisKey);
-      //   if (cached) {
-      //     const parsed = JSON.parse(cached);
-      //     if (Array.isArray(parsed) && parsed.length > 0) {
-      //       return {
-      //         success: true,
-      //         message: "Cached messages fetched successfully",
-      //         data: parsed,
-      //       };
-      //     }
-      //   }
-      // } catch (redisError) {
-      //   console.warn("Redis read error:", redisError);
-      // }
+      try {
+        const cached = await redis.get(redisKey);
+        if (cached && typeof cached === "string") {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return {
+              success: true,
+              message: "Cached messages fetched successfully",
+              data: parsed,
+            };
+          }
+        }
+      } catch (redisError) {
+        console.warn("Redis read error:", redisError);
+      }
 
       try {
         const messages = await prisma.chatMessage.findMany({
@@ -170,11 +175,11 @@ export const projectRouter = trouter({
           },
         });
 
-        // try {
-        //   await redis.setex(redisKey, 3600, JSON.stringify(messages));
-        // } catch (redisError) {
-        //     console.log('Error setting cache while getting messages', redisError)          
-        // }
+        try {
+          await redis.setex(redisKey, 3600, JSON.stringify(messages));
+        } catch (redisError) {
+          console.log("Error setting cache while getting messages", redisError);
+        }
 
         return {
           success: true,

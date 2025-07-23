@@ -54,8 +54,6 @@ export default function Project() {
 
   const { data: fetchedMessages, error: fetchingerror } = useProjectMessages(projectId);
 
-  console.log(fetchingerror)
-
   const {
     data: decisionsData,
     error: decisionsError,

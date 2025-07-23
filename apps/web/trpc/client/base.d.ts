@@ -115,14 +115,7 @@ export declare const createTRPCBaseClient: (url: string) => import("@trpc/client
             output: {
                 success: boolean;
                 message: string;
-                data: {
-                    projectId: string;
-                    id: string;
-                    createdAt: Date;
-                    role: string;
-                    content: string;
-                    metadata: string | null;
-                }[];
+                data: any[];
             };
             meta: object;
         }>;

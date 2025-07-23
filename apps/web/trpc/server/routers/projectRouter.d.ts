@@ -72,14 +72,7 @@ export declare const projectRouter: import("@trpc/server").TRPCBuiltRouter<{
         output: {
             success: boolean;
             message: string;
-            data: {
-                projectId: string;
-                id: string;
-                createdAt: Date;
-                role: string;
-                content: string;
-                metadata: string | null;
-            }[];
+            data: any[];
         };
         meta: object;
     }>;
