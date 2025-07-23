@@ -8,3 +8,11 @@ export interface ProjectDetails {
 export type ProjectWithTypedDetails = Omit<Prisma.ProjectGetPayload<{}>, "details"> & {
     details: ProjectDetails | null;
 };
+export interface Message {
+    projectId: string;
+    id: string;
+    createdAt: Date;
+    role: string;
+    content: string;
+    metadata: string | null;
+}

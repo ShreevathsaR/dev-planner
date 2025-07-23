@@ -52,7 +52,9 @@ export default function Project() {
   const selectedProject = useProjectsStore((state) => state.selectedProject);
   const [decisions, setDecisions] = useState<Decision[]>([]);
 
-  const { data: fetchedMessages } = useProjectMessages(projectId);
+  const { data: fetchedMessages, error: fetchingerror } = useProjectMessages(projectId);
+
+  console.log(fetchingerror)
 
   const {
     data: decisionsData,
