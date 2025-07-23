@@ -170,7 +170,11 @@ export const projectRouter = trouter({
           },
         });
 
-        await redis.setex(redisKey, 3600, JSON.stringify(messages));
+        try {
+          await redis.setex(redisKey, 3600, JSON.stringify(messages));
+        } catch (redisError) {
+            console.log('Error setting cache while getting messages', redisError)          
+        }
 
         return {
           success: true,
