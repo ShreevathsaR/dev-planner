@@ -1,8 +1,13 @@
 import { prisma, Prisma } from "@dev-planner/prisma";
 import { TRPCError, protectedProcedure, trouter } from "../trpc";
-import { createProjectSchema, createMessageSchema } from "@dev-planner/schema";
-import { ProjectDetails, ProjectWithTypedDetails } from "../types";
+import {
+  createProjectSchema,
+  createMessageSchema,
+  projectSchema,
+} from "@dev-planner/schema";
+import { Message, ProjectDetails, ProjectWithTypedDetails } from "../types";
 import * as z from "zod";
+import { redis } from "../redisClient";
 
 export const projectRouter = trouter({
   createProject: protectedProcedure
@@ -92,6 +97,8 @@ export const projectRouter = trouter({
     .mutation(async ({ input }) => {
       const { content, projectId } = input;
 
+      const redisKey = `${projectId}-messages`;
+
       try {
         const message = await prisma.chatMessage.create({
           data: {
@@ -100,6 +107,18 @@ export const projectRouter = trouter({
             role: "user",
           },
         });
+
+        try {
+          const cached = await redis.get(redisKey);
+          const parsed = cached ? JSON.parse(cached) : [];
+          await redis.setex(
+            redisKey,
+            3600,
+            JSON.stringify([...parsed, message])
+          );
+        } catch (redisError) {
+          console.warn("Redis cache update failed:", redisError);
+        }
 
         return {
           success: true,
@@ -125,12 +144,34 @@ export const projectRouter = trouter({
     .input(z.object({ projectId: z.string() }))
     .query(async ({ input }) => {
       const { projectId } = input;
+
+      const redisKey = `${projectId}-messages`;
+
+      try {
+        const cached = await redis.get(redisKey);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return {
+              success: true,
+              message: "Cached messages fetched successfully",
+              data: parsed,
+            };
+          }
+        }
+      } catch (redisError) {
+        console.warn("Redis read error:", redisError);
+      }
+
       try {
         const messages = await prisma.chatMessage.findMany({
           where: {
             projectId,
           },
         });
+
+        await redis.setex(redisKey, 3600, JSON.stringify(messages));
+
         return {
           success: true,
           message: `Messages fetched successfully`,
@@ -251,6 +292,26 @@ export const projectRouter = trouter({
           cause: error,
         });
       }
+    }),
+  updateProject: protectedProcedure
+    .input(projectSchema)
+    .mutation(({ input }) => {
+      const { id } = input;
+
+      const updatedProject = prisma.project.update({
+        where: {
+          id,
+        },
+        data: {
+          ...input,
+        },
+      });
+
+      return {
+        success: true,
+        message: "Project updated successfully",
+        data: updatedProject,
+      };
     }),
   testProject: protectedProcedure.query(({ ctx }) => {
     return `Hello ${ctx.user?.email}`;

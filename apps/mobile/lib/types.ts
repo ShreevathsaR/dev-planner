@@ -25,6 +25,7 @@ export interface Project {
   createdAt: string;
   updatedAt: string;
   createdBy: string;
+  customContext?: string | null;
 }
 
 export interface ProjectsStore {
@@ -52,4 +53,17 @@ export interface DecisionType {
   reason: string;
   confidence_score: number;
   recommendation: string;
+}
+
+export interface Decision {
+  id: string;
+  key: string;
+  projectId: string;
+  createdAt: string;
+  value: string;
+  category: string;
+  reason: string | null;
+  confidence_score: number;
+  recommendation: string | null;
+  updatedAt: string;
 }

@@ -8,9 +8,11 @@ import {
   Platform,
   UIManager,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { BottomSheetScrollView, BottomSheetView } from "@gorhom/bottom-sheet";
 import Feather from "@expo/vector-icons/Feather";
+import { trpcReact } from "@/trpc";
+import { Decision } from "@/lib/types";
 
 if (Platform.OS === "android") {
   UIManager.setLayoutAnimationEnabledExperimental?.(true);
@@ -18,27 +20,12 @@ if (Platform.OS === "android") {
 
 interface DecisionsSheetParams {
   closeBottomSheet: (type: "decisions" | "details") => void;
-  decisions:
-    | {
-        data: {
-          id: string;
-          key: string;
-          projectId: string;
-          createdAt: string;
-          value: string;
-          category: string;
-          reason: string | null;
-          confidence_score: number;
-          recommendation: string | null;
-          updatedAt: string;
-        }[];
-        success: boolean;
-        message: string;
-      }
-    | undefined;
+  decisions: Decision[];
   isDecisionsFetching: boolean;
   decisionsError: any | null;
   projectName: string;
+  projectId: string;
+  setDecisions: React.Dispatch<React.SetStateAction<Decision[]>>;
   decisionRefetch: () => void;
 }
 
@@ -48,9 +35,13 @@ export default function DecisionsSheet({
   isDecisionsFetching,
   decisionsError,
   projectName,
+  projectId,
   decisionRefetch,
+  setDecisions,
 }: DecisionsSheetParams) {
   const [expanded, setExpanded] = useState<{ [key: string]: boolean }>({});
+
+  const utils = trpcReact.useUtils();
 
   const toggleExpand = (id: string) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -60,9 +51,7 @@ export default function DecisionsSheet({
     }));
   };
 
-  useEffect(() => {
-    decisionRefetch();
-  }, []);
+  utils.projectsRouter.getDecisions.refetch({ projectId });
 
   if (decisionsError) {
     return (
@@ -84,7 +73,7 @@ export default function DecisionsSheet({
   }
 
   return (
-    <BottomSheetView style={styles.contentContainer}>
+    <BottomSheetScrollView style={styles.contentContainer}>
       <View style={styles.sheetHeader}>
         <Text style={styles.sheetTitle}>Decisions</Text>
         <Pressable
@@ -99,7 +88,7 @@ export default function DecisionsSheet({
         View the decisions made and make changes if needed
       </Text>
       <View style={styles.container}>
-        {decisions?.data.map((decision) => {
+        {decisions?.map((decision) => {
           const isExpanded = expanded[decision.id];
           return (
             <View key={decision.id}>
@@ -142,7 +131,7 @@ export default function DecisionsSheet({
           );
         })}
       </View>
-    </BottomSheetView>
+    </BottomSheetScrollView>
   );
 }
 
@@ -178,6 +167,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginTop: 20,
     gap: 10,
+    paddingBottom: 50,
   },
   errorContainer: {
     flex: 1,

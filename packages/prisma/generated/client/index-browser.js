@@ -126,7 +126,8 @@ exports.Prisma.UserScalarFieldEnum = {
   email: 'email',
   image: 'image',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  style: 'style'
 };
 
 exports.Prisma.ProjectScalarFieldEnum = {
@@ -136,7 +137,8 @@ exports.Prisma.ProjectScalarFieldEnum = {
   details: 'details',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  createdBy: 'createdBy'
+  createdBy: 'createdBy',
+  customContext: 'customContext'
 };
 
 exports.Prisma.ChatMessageScalarFieldEnum = {

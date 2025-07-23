@@ -28,10 +28,10 @@ import {
   useNavigation,
 } from "expo-router";
 import { useProjectsStore } from "@/lib/context/userStore";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetScrollView, BottomSheetView } from "@gorhom/bottom-sheet";
 import Feather from "@expo/vector-icons/Feather";
 import EventSource from "react-native-sse";
-import { ChatMessage, DecisionType } from "@/lib/types";
+import { ChatMessage, Decision, DecisionType } from "@/lib/types";
 import { trpcReact } from "../../trpc";
 import { useProjectMessages } from "@/hooks/useProjectMessages";
 import DecisionsSheet from "@/components/DecisionsSheet";
@@ -50,17 +50,29 @@ export default function Project() {
   const eventSourceRef = useRef<EventSource | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const selectedProject = useProjectsStore((state) => state.selectedProject);
+  const [decisions, setDecisions] = useState<Decision[]>([]);
 
   const { data: fetchedMessages } = useProjectMessages(projectId);
 
-  const {data: decisions, error: decisionsError, isFetching: isDecisionsFetching, refetch: decisionRefetch} = trpcReact.projectsRouter.getDecisions.useQuery(
+  const {
+    data: decisionsData,
+    error: decisionsError,
+    isFetching: isDecisionsFetching,
+    refetch: decisionRefetch,
+  } = trpcReact.projectsRouter.getDecisions.useQuery(
     {
       projectId: projectId as string,
     },
     {
-      staleTime: 1000 * 60 * 1, 
+      staleTime: 1000 * 60 * 1,
     }
   );
+
+useEffect(() => {
+  if (decisionsData) {
+    setDecisions(decisionsData.data);
+  }
+}, [decisionsData]);
 
   const updateDecisions =
     trpcReact.projectsRouter.updateProjectDecisions.useMutation({
@@ -175,6 +187,7 @@ export default function Project() {
   );
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [context, setContext] = useState<string>("");
 
   const [inputText, setInputText] = useState("");
   const scrollViewRef = useRef<ScrollView>(null);
@@ -195,7 +208,7 @@ export default function Project() {
   }, []);
 
   const createMessage = trpcReact.projectsRouter.createMessage.useMutation({
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (data && data.success) {
         const { data: userMessage } = data;
         setMessages((prevMessages) => [...prevMessages, userMessage]);
@@ -219,25 +232,6 @@ export default function Project() {
         scrollToBottom();
 
         try {
-          console.log(
-            "Sending message to server:",
-            JSON.stringify({
-              message: currentMessage.content,
-              project,
-              messageHistory: messages
-                .filter((message) => message.role === "user")
-                .sort(
-                  (a, b) =>
-                    new Date(a.createdAt).getTime() -
-                    new Date(b.createdAt).getTime()
-                )
-                .slice(-5)
-                .map((message) => ({
-                  role: message.role,
-                  content: message.content,
-                })),
-            })
-          );
 
           eventSourceRef.current = new EventSource(
             `${SERVER_URL}/api/ai-response`,
@@ -261,20 +255,20 @@ export default function Project() {
                     role: message.role,
                     content: message.content,
                   })),
-                previousDecisions: decisions?.data.map((decision) => {
+                previousDecisions: decisions?.map((decision: Decision) => {
                   return {
-                    category : decision.category,
+                    category: decision.category,
                     key: decision.key,
                     value: decision.value,
                     reason: decision.reason,
                     confidence_score: decision.confidence_score,
-                  }
+                  };
                 }),
               }),
             }
           );
 
-          eventSourceRef.current.addEventListener("message", (event) => {
+          eventSourceRef.current.addEventListener("message", async (event) => {
             try {
               console.log("Received event data:", event.data);
               const data = JSON.parse(event.data as string);
@@ -357,7 +351,6 @@ export default function Project() {
                     eventSourceRef.current.close();
                     eventSourceRef.current = null;
                   }
-                  decisionRefetch();
                   break;
 
                 case "error":
@@ -596,7 +589,7 @@ export default function Project() {
           handleIndicatorStyle={styles.handleIndicator}
           animateOnMount={true}
         >
-          <BottomSheetView style={styles.contentContainer}>
+          <BottomSheetScrollView style={styles.contentContainer}>
             <ScrollView>
               <View style={styles.sheetHeader}>
                 <Text style={styles.sheetTitle}>Project Details</Text>
@@ -616,9 +609,28 @@ export default function Project() {
                   style={styles.input}
                   placeholder="Enter your own context"
                   placeholderTextColor="#666666"
+                  value={project?.customContext || ''}
+                  multiline
                 />
               </View>
-
+              {context && (
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: "black",
+                    borderColor: "#696969",
+                    borderWidth: 1,
+                    width: "50%",
+                    padding: 10,
+                    alignSelf: "center",
+                    marginBottom: 20,
+                    borderRadius: 5,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text style={{ color: "white" }}>Update</Text>
+                </TouchableOpacity>
+              )}
               {project?.details && (
                 <View style={styles.detailsContent}>
                   <View style={styles.detailItem}>
@@ -659,20 +671,33 @@ export default function Project() {
                 <Text style={styles.backButtonText}>Close Details</Text>
               </Pressable>
             </ScrollView>
-          </BottomSheetView>
+          </BottomSheetScrollView>
         </BottomSheet>
-        {project && <BottomSheet
-          ref={decisionsBottomSheetRef}
-          index={-1}
-          snapPoints={snapPoints}
-          onChange={handleDecisionSheetChanges}
-          enablePanDownToClose
-          backgroundStyle={styles.sheetBackground}
-          handleIndicatorStyle={styles.handleIndicator}
-          animateOnMount={true}
-        >
-          <DecisionsSheet {...{ closeBottomSheet, decisions, isDecisionsFetching, decisionsError, projectName: project.name, decisionRefetch }} />
-        </BottomSheet>}
+        {project && (
+          <BottomSheet
+            ref={decisionsBottomSheetRef}
+            index={-1}
+            snapPoints={snapPoints}
+            onChange={handleDecisionSheetChanges}
+            enablePanDownToClose
+            backgroundStyle={styles.sheetBackground}
+            handleIndicatorStyle={styles.handleIndicator}
+            animateOnMount={true}
+          >
+            <DecisionsSheet
+              {...{
+                closeBottomSheet,
+                decisions,
+                setDecisions,
+                isDecisionsFetching,
+                decisionsError,
+                projectName: project.name,
+                projectId: project.id,
+                decisionRefetch
+              }}
+            />
+          </BottomSheet>
+        )}
       </View>
     </>
   );

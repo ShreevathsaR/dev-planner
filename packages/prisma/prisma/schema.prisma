@@ -21,6 +21,7 @@ model User {
   image     String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now())
+  style     String?   @default("normal")
   projects  Project[]
 
   @@unique([email, id])
@@ -36,6 +37,7 @@ model Project {
   createdBy     String
   chatMessages  ChatMessage[]
   decisions     Decision[]
+  customContext String?       @default("")
   createdByUser User          @relation(fields: [createdBy], references: [id])
 }
 

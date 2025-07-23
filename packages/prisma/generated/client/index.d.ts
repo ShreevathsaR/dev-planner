@@ -1229,6 +1229,7 @@ export namespace Prisma {
     image: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    style: string | null
   }
 
   export type UserMaxAggregateOutputType = {
@@ -1238,6 +1239,7 @@ export namespace Prisma {
     image: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    style: string | null
   }
 
   export type UserCountAggregateOutputType = {
@@ -1247,6 +1249,7 @@ export namespace Prisma {
     image: number
     createdAt: number
     updatedAt: number
+    style: number
     _all: number
   }
 
@@ -1258,6 +1261,7 @@ export namespace Prisma {
     image?: true
     createdAt?: true
     updatedAt?: true
+    style?: true
   }
 
   export type UserMaxAggregateInputType = {
@@ -1267,6 +1271,7 @@ export namespace Prisma {
     image?: true
     createdAt?: true
     updatedAt?: true
+    style?: true
   }
 
   export type UserCountAggregateInputType = {
@@ -1276,6 +1281,7 @@ export namespace Prisma {
     image?: true
     createdAt?: true
     updatedAt?: true
+    style?: true
     _all?: true
   }
 
@@ -1358,6 +1364,7 @@ export namespace Prisma {
     image: string | null
     createdAt: Date
     updatedAt: Date
+    style: string | null
     _count: UserCountAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
     _max: UserMaxAggregateOutputType | null
@@ -1384,6 +1391,7 @@ export namespace Prisma {
     image?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    style?: boolean
     projects?: boolean | User$projectsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
@@ -1395,6 +1403,7 @@ export namespace Prisma {
     image?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    style?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -1404,6 +1413,7 @@ export namespace Prisma {
     image?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    style?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
@@ -1413,9 +1423,10 @@ export namespace Prisma {
     image?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    style?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "image" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "image" | "createdAt" | "updatedAt" | "style", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     projects?: boolean | User$projectsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -1435,6 +1446,7 @@ export namespace Prisma {
       image: string | null
       createdAt: Date
       updatedAt: Date
+      style: string | null
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -1865,6 +1877,7 @@ export namespace Prisma {
     readonly image: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
+    readonly style: FieldRef<"User", 'String'>
   }
     
 
@@ -2312,6 +2325,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     createdBy: string | null
+    customContext: string | null
   }
 
   export type ProjectMaxAggregateOutputType = {
@@ -2321,6 +2335,7 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     createdBy: string | null
+    customContext: string | null
   }
 
   export type ProjectCountAggregateOutputType = {
@@ -2331,6 +2346,7 @@ export namespace Prisma {
     createdAt: number
     updatedAt: number
     createdBy: number
+    customContext: number
     _all: number
   }
 
@@ -2342,6 +2358,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     createdBy?: true
+    customContext?: true
   }
 
   export type ProjectMaxAggregateInputType = {
@@ -2351,6 +2368,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     createdBy?: true
+    customContext?: true
   }
 
   export type ProjectCountAggregateInputType = {
@@ -2361,6 +2379,7 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     createdBy?: true
+    customContext?: true
     _all?: true
   }
 
@@ -2444,6 +2463,7 @@ export namespace Prisma {
     createdAt: Date
     updatedAt: Date
     createdBy: string
+    customContext: string | null
     _count: ProjectCountAggregateOutputType | null
     _min: ProjectMinAggregateOutputType | null
     _max: ProjectMaxAggregateOutputType | null
@@ -2471,6 +2491,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean
+    customContext?: boolean
     chatMessages?: boolean | Project$chatMessagesArgs<ExtArgs>
     decisions?: boolean | Project$decisionsArgs<ExtArgs>
     createdByUser?: boolean | UserDefaultArgs<ExtArgs>
@@ -2485,6 +2506,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean
+    customContext?: boolean
     createdByUser?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["project"]>
 
@@ -2496,6 +2518,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean
+    customContext?: boolean
     createdByUser?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["project"]>
 
@@ -2507,9 +2530,10 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     createdBy?: boolean
+    customContext?: boolean
   }
 
-  export type ProjectOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "details" | "createdAt" | "updatedAt" | "createdBy", ExtArgs["result"]["project"]>
+  export type ProjectOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "details" | "createdAt" | "updatedAt" | "createdBy" | "customContext", ExtArgs["result"]["project"]>
   export type ProjectInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     chatMessages?: boolean | Project$chatMessagesArgs<ExtArgs>
     decisions?: boolean | Project$decisionsArgs<ExtArgs>
@@ -2538,6 +2562,7 @@ export namespace Prisma {
       createdAt: Date
       updatedAt: Date
       createdBy: string
+      customContext: string | null
     }, ExtArgs["result"]["project"]>
     composites: {}
   }
@@ -2971,6 +2996,7 @@ export namespace Prisma {
     readonly createdAt: FieldRef<"Project", 'DateTime'>
     readonly updatedAt: FieldRef<"Project", 'DateTime'>
     readonly createdBy: FieldRef<"Project", 'String'>
+    readonly customContext: FieldRef<"Project", 'String'>
   }
     
 
@@ -5681,7 +5707,8 @@ export namespace Prisma {
     email: 'email',
     image: 'image',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    style: 'style'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -5694,7 +5721,8 @@ export namespace Prisma {
     details: 'details',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    createdBy: 'createdBy'
+    createdBy: 'createdBy',
+    customContext: 'customContext'
   };
 
   export type ProjectScalarFieldEnum = (typeof ProjectScalarFieldEnum)[keyof typeof ProjectScalarFieldEnum]
@@ -5857,6 +5885,7 @@ export namespace Prisma {
     image?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    style?: StringNullableFilter<"User"> | string | null
     projects?: ProjectListRelationFilter
   }
 
@@ -5867,6 +5896,7 @@ export namespace Prisma {
     image?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    style?: SortOrderInput | SortOrder
     projects?: ProjectOrderByRelationAggregateInput
   }
 
@@ -5881,6 +5911,7 @@ export namespace Prisma {
     image?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    style?: StringNullableFilter<"User"> | string | null
     projects?: ProjectListRelationFilter
   }, "id" | "email_id">
 
@@ -5891,6 +5922,7 @@ export namespace Prisma {
     image?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    style?: SortOrderInput | SortOrder
     _count?: UserCountOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
     _min?: UserMinOrderByAggregateInput
@@ -5906,6 +5938,7 @@ export namespace Prisma {
     image?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
+    style?: StringNullableWithAggregatesFilter<"User"> | string | null
   }
 
   export type ProjectWhereInput = {
@@ -5919,6 +5952,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Project"> | Date | string
     updatedAt?: DateTimeFilter<"Project"> | Date | string
     createdBy?: StringFilter<"Project"> | string
+    customContext?: StringNullableFilter<"Project"> | string | null
     chatMessages?: ChatMessageListRelationFilter
     decisions?: DecisionListRelationFilter
     createdByUser?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -5932,6 +5966,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: SortOrder
+    customContext?: SortOrderInput | SortOrder
     chatMessages?: ChatMessageOrderByRelationAggregateInput
     decisions?: DecisionOrderByRelationAggregateInput
     createdByUser?: UserOrderByWithRelationInput
@@ -5948,6 +5983,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Project"> | Date | string
     updatedAt?: DateTimeFilter<"Project"> | Date | string
     createdBy?: StringFilter<"Project"> | string
+    customContext?: StringNullableFilter<"Project"> | string | null
     chatMessages?: ChatMessageListRelationFilter
     decisions?: DecisionListRelationFilter
     createdByUser?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -5961,6 +5997,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: SortOrder
+    customContext?: SortOrderInput | SortOrder
     _count?: ProjectCountOrderByAggregateInput
     _max?: ProjectMaxOrderByAggregateInput
     _min?: ProjectMinOrderByAggregateInput
@@ -5977,6 +6014,7 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"Project"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Project"> | Date | string
     createdBy?: StringWithAggregatesFilter<"Project"> | string
+    customContext?: StringNullableWithAggregatesFilter<"Project"> | string | null
   }
 
   export type ChatMessageWhereInput = {
@@ -6129,6 +6167,7 @@ export namespace Prisma {
     image?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    style?: string | null
     projects?: ProjectCreateNestedManyWithoutCreatedByUserInput
   }
 
@@ -6139,6 +6178,7 @@ export namespace Prisma {
     image?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    style?: string | null
     projects?: ProjectUncheckedCreateNestedManyWithoutCreatedByUserInput
   }
 
@@ -6149,6 +6189,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    style?: NullableStringFieldUpdateOperationsInput | string | null
     projects?: ProjectUpdateManyWithoutCreatedByUserNestedInput
   }
 
@@ -6159,6 +6200,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    style?: NullableStringFieldUpdateOperationsInput | string | null
     projects?: ProjectUncheckedUpdateManyWithoutCreatedByUserNestedInput
   }
 
@@ -6169,6 +6211,7 @@ export namespace Prisma {
     image?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    style?: string | null
   }
 
   export type UserUpdateManyMutationInput = {
@@ -6178,6 +6221,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    style?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type UserUncheckedUpdateManyInput = {
@@ -6187,6 +6231,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    style?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ProjectCreateInput = {
@@ -6196,6 +6241,7 @@ export namespace Prisma {
     details?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    customContext?: string | null
     chatMessages?: ChatMessageCreateNestedManyWithoutProjectInput
     decisions?: DecisionCreateNestedManyWithoutProjectInput
     createdByUser: UserCreateNestedOneWithoutProjectsInput
@@ -6209,6 +6255,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy: string
+    customContext?: string | null
     chatMessages?: ChatMessageUncheckedCreateNestedManyWithoutProjectInput
     decisions?: DecisionUncheckedCreateNestedManyWithoutProjectInput
   }
@@ -6220,6 +6267,7 @@ export namespace Prisma {
     details?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customContext?: NullableStringFieldUpdateOperationsInput | string | null
     chatMessages?: ChatMessageUpdateManyWithoutProjectNestedInput
     decisions?: DecisionUpdateManyWithoutProjectNestedInput
     createdByUser?: UserUpdateOneRequiredWithoutProjectsNestedInput
@@ -6233,6 +6281,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: StringFieldUpdateOperationsInput | string
+    customContext?: NullableStringFieldUpdateOperationsInput | string | null
     chatMessages?: ChatMessageUncheckedUpdateManyWithoutProjectNestedInput
     decisions?: DecisionUncheckedUpdateManyWithoutProjectNestedInput
   }
@@ -6245,6 +6294,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy: string
+    customContext?: string | null
   }
 
   export type ProjectUpdateManyMutationInput = {
@@ -6254,6 +6304,7 @@ export namespace Prisma {
     details?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customContext?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ProjectUncheckedUpdateManyInput = {
@@ -6264,6 +6315,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: StringFieldUpdateOperationsInput | string
+    customContext?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ChatMessageCreateInput = {
@@ -6486,6 +6538,7 @@ export namespace Prisma {
     image?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    style?: SortOrder
   }
 
   export type UserMaxOrderByAggregateInput = {
@@ -6495,6 +6548,7 @@ export namespace Prisma {
     image?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    style?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
@@ -6504,6 +6558,7 @@ export namespace Prisma {
     image?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    style?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -6612,6 +6667,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: SortOrder
+    customContext?: SortOrder
   }
 
   export type ProjectMaxOrderByAggregateInput = {
@@ -6621,6 +6677,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: SortOrder
+    customContext?: SortOrder
   }
 
   export type ProjectMinOrderByAggregateInput = {
@@ -6630,6 +6687,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     createdBy?: SortOrder
+    customContext?: SortOrder
   }
   export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -7124,6 +7182,7 @@ export namespace Prisma {
     details?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    customContext?: string | null
     chatMessages?: ChatMessageCreateNestedManyWithoutProjectInput
     decisions?: DecisionCreateNestedManyWithoutProjectInput
   }
@@ -7135,6 +7194,7 @@ export namespace Prisma {
     details?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    customContext?: string | null
     chatMessages?: ChatMessageUncheckedCreateNestedManyWithoutProjectInput
     decisions?: DecisionUncheckedCreateNestedManyWithoutProjectInput
   }
@@ -7176,6 +7236,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Project"> | Date | string
     updatedAt?: DateTimeFilter<"Project"> | Date | string
     createdBy?: StringFilter<"Project"> | string
+    customContext?: StringNullableFilter<"Project"> | string | null
   }
 
   export type ChatMessageCreateWithoutProjectInput = {
@@ -7245,6 +7306,7 @@ export namespace Prisma {
     image?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    style?: string | null
   }
 
   export type UserUncheckedCreateWithoutProjectsInput = {
@@ -7254,6 +7316,7 @@ export namespace Prisma {
     image?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    style?: string | null
   }
 
   export type UserCreateOrConnectWithoutProjectsInput = {
@@ -7339,6 +7402,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    style?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type UserUncheckedUpdateWithoutProjectsInput = {
@@ -7348,6 +7412,7 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    style?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ProjectCreateWithoutChatMessagesInput = {
@@ -7357,6 +7422,7 @@ export namespace Prisma {
     details?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    customContext?: string | null
     decisions?: DecisionCreateNestedManyWithoutProjectInput
     createdByUser: UserCreateNestedOneWithoutProjectsInput
   }
@@ -7369,6 +7435,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy: string
+    customContext?: string | null
     decisions?: DecisionUncheckedCreateNestedManyWithoutProjectInput
   }
 
@@ -7395,6 +7462,7 @@ export namespace Prisma {
     details?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customContext?: NullableStringFieldUpdateOperationsInput | string | null
     decisions?: DecisionUpdateManyWithoutProjectNestedInput
     createdByUser?: UserUpdateOneRequiredWithoutProjectsNestedInput
   }
@@ -7407,6 +7475,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: StringFieldUpdateOperationsInput | string
+    customContext?: NullableStringFieldUpdateOperationsInput | string | null
     decisions?: DecisionUncheckedUpdateManyWithoutProjectNestedInput
   }
 
@@ -7417,6 +7486,7 @@ export namespace Prisma {
     details?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    customContext?: string | null
     chatMessages?: ChatMessageCreateNestedManyWithoutProjectInput
     createdByUser: UserCreateNestedOneWithoutProjectsInput
   }
@@ -7429,6 +7499,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy: string
+    customContext?: string | null
     chatMessages?: ChatMessageUncheckedCreateNestedManyWithoutProjectInput
   }
 
@@ -7455,6 +7526,7 @@ export namespace Prisma {
     details?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customContext?: NullableStringFieldUpdateOperationsInput | string | null
     chatMessages?: ChatMessageUpdateManyWithoutProjectNestedInput
     createdByUser?: UserUpdateOneRequiredWithoutProjectsNestedInput
   }
@@ -7467,6 +7539,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: StringFieldUpdateOperationsInput | string
+    customContext?: NullableStringFieldUpdateOperationsInput | string | null
     chatMessages?: ChatMessageUncheckedUpdateManyWithoutProjectNestedInput
   }
 
@@ -7477,6 +7550,7 @@ export namespace Prisma {
     details?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    customContext?: string | null
   }
 
   export type ProjectUpdateWithoutCreatedByUserInput = {
@@ -7486,6 +7560,7 @@ export namespace Prisma {
     details?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customContext?: NullableStringFieldUpdateOperationsInput | string | null
     chatMessages?: ChatMessageUpdateManyWithoutProjectNestedInput
     decisions?: DecisionUpdateManyWithoutProjectNestedInput
   }
@@ -7497,6 +7572,7 @@ export namespace Prisma {
     details?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customContext?: NullableStringFieldUpdateOperationsInput | string | null
     chatMessages?: ChatMessageUncheckedUpdateManyWithoutProjectNestedInput
     decisions?: DecisionUncheckedUpdateManyWithoutProjectNestedInput
   }
@@ -7508,6 +7584,7 @@ export namespace Prisma {
     details?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customContext?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ChatMessageCreateManyProjectInput = {

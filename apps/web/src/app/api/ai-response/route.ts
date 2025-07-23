@@ -2,6 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { prisma } from "@dev-planner/prisma";
 import { NextRequest } from "next/server";
 import * as z from "zod";
+import { redis } from "trpc/server";
 
 const AIRequestSchema = z.object({
   message: z.string().min(1, "Message is required"),
@@ -33,7 +34,7 @@ const AIRequestSchema = z.object({
       reason: z.string(),
       confidence_score: z.number().min(0).max(1),
     })
-  )
+  ),
 });
 
 export async function POST(request: NextRequest) {
@@ -44,11 +45,12 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  
-  const { project, message, messageHistory, previousDecisions } = parseResult.data;
+  const { project, message, messageHistory, previousDecisions } =
+    parseResult.data;
+  const redisKey = project.id;
 
   const previousMessages = messageHistory.map((message) => {
-      return message.content;
+    return message.content;
   });
   const genAI = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY || "",
@@ -134,6 +136,18 @@ This section will contain a list of decisions made by you in the following forma
             role: "assistant",
           },
         });
+
+        try {
+          const cached = await redis.get(redisKey);
+          const parsed = cached ? JSON.parse(cached) : [];
+          await redis.setex(
+            redisKey,
+            3600,
+            JSON.stringify([...parsed, message])
+          );
+        } catch (redisError) {
+          console.warn("Redis cache update failed:", redisError);
+        }
 
         controller.enqueue(
           encoder.encode(
