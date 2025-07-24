@@ -54,13 +54,15 @@ export default function Project() {
 
   const { data: fetchedMessages, error: fetchingerror } =
     useProjectMessages(projectId);
+  const utils = trpcReact.useUtils();
 
   const updateProjectData = trpcReact.projectsRouter.updateProject.useMutation({
-    onSuccess: ({ data }) => {
+    onSuccess: async ({ data }) => {
       Toast.show({
         type: "success",
         text1: "Context updated successfully",
       });
+      await utils.projectsRouter.getProjects.refetch();
       setCustomContext(data.customContext);
     },
     onError: ({data, message}) => {
@@ -178,6 +180,9 @@ export default function Project() {
   const [customContext, setCustomContext] = useState(
     project?.customContext || ""
   );
+  useEffect(() => {
+    setCustomContext(project?.customContext || "");
+  }, [project]);
 
   const [inputText, setInputText] = useState("");
   const scrollViewRef = useRef<ScrollView>(null);

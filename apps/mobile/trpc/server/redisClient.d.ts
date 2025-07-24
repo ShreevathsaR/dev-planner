@@ -1,5 +1,2 @@
-import Redis from "ioredis";
-declare global {
-    var redis: Redis | undefined;
-}
+import { Redis } from "@upstash/redis";
 export declare const redis: Redis;

@@ -12,10 +12,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { navigate } from "expo-router/build/global-state/routing";
 import Toast from "react-native-toast-message";
 import { TextInput } from "react-native-gesture-handler";
-import { trpcReact } from "../../../trpc/client";
+import { trpcReact } from "../../trpc/client";
 import { Controller, set, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createProjectSchema } from "../../../schema";
+import { createProjectSchema } from "../../schema";
 import * as z from "zod";
 import Icon from "@expo/vector-icons/Feather";
 import SelectDropdown from "react-native-select-dropdown";
@@ -71,11 +71,12 @@ export default function CreateProject() {
     console.log(data);
     if (user) {
       router.replace({
-        pathname: "./moreProjectDetails",
+        pathname: "/moreProjectDetails",
         params: {
           data: encodeURIComponent(JSON.stringify(data)),
         },
       });
+      setIsLoading(false);
     } else {
       Toast.show({
         type: "error",
@@ -83,6 +84,7 @@ export default function CreateProject() {
         text2: "You must be logged in to create a project",
         visibilityTime: 2000,
       });
+      setIsLoading(false);
     }
   };
 
@@ -92,9 +94,9 @@ export default function CreateProject() {
         options={{
           headerLeft: () => {
             return (
-              <Link href={selectedProject ? `/${selectedProject.id}` : '/(app)/'} style={{ marginLeft: 5, padding: 10 }}>
+              <TouchableOpacity onPress={() => router.push(selectedProject ? `/${selectedProject.id}` : '/(app)/')} style={{ marginLeft: 5, padding: 10 }}>
                 <Feather name="arrow-left" size={24} color="white" />
-              </Link>
+              </TouchableOpacity>
             );
           },
           headerShown: true,

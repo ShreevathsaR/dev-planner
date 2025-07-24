@@ -175,7 +175,7 @@ export default function DrawerLayout() {
               alignItems: "center",
             }}
           >
-            <Link href={`/project/createProject?userId=${user?.uid}`} asChild>
+            <Link href={`/createProject?userId=${user?.uid}`} asChild>
               <TouchableOpacity
                 style={{
                   backgroundColor: "lightgray",

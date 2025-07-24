@@ -11,7 +11,7 @@ import Toast from "react-native-toast-message";
 import MultiSelect from "react-native-multiple-select";
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { createProjectType } from "@/lib/types";
-import { trpcReact } from "../../../trpc/client";
+import { trpcReact } from "../../trpc/client";
 import { useProjectsStore } from "@/lib/context/userStore";
 import Feather from "@expo/vector-icons/Feather";
 
@@ -169,9 +169,9 @@ export default function MoreProjectDetails() {
           options={{
             headerLeft: () => {
               return (
-                <Link href={selectedProject ? `/${selectedProject.id}` : '/(app)/'} style={{ marginLeft: 5, padding: 10 }}>
+                <TouchableOpacity onPress={() => router.back()} style={{ marginLeft: 5, padding: 10 }}>
                   <Feather name="arrow-left" size={24} color="white" />
-                </Link>
+                </TouchableOpacity>
               );
             },
             headerShown: true,
