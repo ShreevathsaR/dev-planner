@@ -14,19 +14,21 @@ export const trpc = trpcReact.createClient({
     httpLink({
       url: `${process.env.EXPO_PUBLIC_BASE_URL}/api/trpc`,
       async headers() {
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json", 
+        };
+
         if (auth.currentUser && auth.currentUser.emailVerified) {
           try {
             const token = await auth.currentUser.getIdToken();
-            return {
-              Authorization: `Bearer ${token}`,
-            };
+            headers["Authorization"] = `Bearer ${token}`;
           } catch (error) {
             console.log("Failed to get token:", error);
           }
         }
-        return {};
+
+        return headers;
       },
     }),
   ],
 });
-

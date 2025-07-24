@@ -33,20 +33,44 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createMessageSchema = exports.createProjectSchema = void 0;
+exports.createMessageSchema = exports.projectSchema = exports.createProjectSchema = void 0;
 const z = __importStar(require("zod"));
 exports.createProjectSchema = z.object({
-    name: z.string().min(4, 'Project name should contain atleast 4 characters').max(30, 'Project name should contain atmost 30 characters'),
-    createdBy: z.string().min(1, 'Created by should not be empty'),
+    name: z
+        .string()
+        .min(4, "Project name should contain atleast 4 characters")
+        .max(30, "Project name should contain atmost 30 characters"),
+    createdBy: z.string().min(1, "Created by should not be empty"),
     description: z.string().optional(),
-    details: z.object({
+    details: z
+        .object({
         teamSize: z.number().int().positive().optional(),
         skills: z.array(z.string()).optional(),
-        budget: z.enum(['low', 'medium', 'high']).optional(),
+        budget: z.enum(["low", "medium", "high"]).optional(),
         timeline: z.string().optional(),
-    }).optional(),
+    })
+        .optional(),
+    customContext: z.string().max(300).optional(),
+});
+exports.projectSchema = z.object({
+    id: z.string(),
+    name: z
+        .string()
+        .min(4, "Project name should contain atleast 4 characters")
+        .max(30, "Project name should contain atmost 30 characters"),
+    createdBy: z.string().min(1, "Created by should not be empty"),
+    description: z.string().optional(),
+    details: z
+        .object({
+        teamSize: z.number().int().positive().optional(),
+        skills: z.array(z.string()).optional(),
+        budget: z.enum(["low", "medium", "high"]).optional(),
+        timeline: z.string().optional(),
+    })
+        .optional(),
+    customContext: z.string().max(300),
 });
 exports.createMessageSchema = z.object({
-    projectId: z.string().min(1, 'Project id should not be empty'),
-    content: z.string().min(1, 'Message should not be empty'),
+    projectId: z.string().min(1, "Project id should not be empty"),
+    content: z.string().min(1, "Message should not be empty"),
 });

@@ -16,25 +16,25 @@ import {
   StatusBar,
   Dimensions,
   Pressable,
-  ActivityIndicator,
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import Icon from "@expo/vector-icons/Feather";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
-  router,
   Stack,
   useLocalSearchParams,
-  useNavigation,
 } from "expo-router";
 import { useProjectsStore } from "@/lib/context/userStore";
-import BottomSheet, { BottomSheetScrollView, BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetScrollView,
+} from "@gorhom/bottom-sheet";
 import Feather from "@expo/vector-icons/Feather";
 import EventSource from "react-native-sse";
 import { ChatMessage, Decision, DecisionType } from "@/lib/types";
 import { trpcReact } from "../../trpc";
 import { useProjectMessages } from "@/hooks/useProjectMessages";
 import DecisionsSheet from "@/components/DecisionsSheet";
+import Toast from "react-native-toast-message";
 
 const { width } = Dimensions.get("window");
 
@@ -52,7 +52,26 @@ export default function Project() {
   const selectedProject = useProjectsStore((state) => state.selectedProject);
   const [decisions, setDecisions] = useState<Decision[]>([]);
 
-  const { data: fetchedMessages, error: fetchingerror } = useProjectMessages(projectId);
+  const { data: fetchedMessages, error: fetchingerror } =
+    useProjectMessages(projectId);
+
+  const updateProjectData = trpcReact.projectsRouter.updateProject.useMutation({
+    onSuccess: ({ data }) => {
+      Toast.show({
+        type: "success",
+        text1: "Context updated successfully",
+      });
+      setCustomContext(data.customContext);
+    },
+    onError: ({data, message}) => {
+      console.error("Failed to update context:", data, message);
+      Toast.show({
+        type: "error",
+        text1: "Failed to update context",
+        text2: message || "Please try again later.",
+      });
+    },
+  });
 
   const {
     data: decisionsData,
@@ -68,11 +87,11 @@ export default function Project() {
     }
   );
 
-useEffect(() => {
-  if (decisionsData) {
-    setDecisions(decisionsData.data);
-  }
-}, [decisionsData]);
+  useEffect(() => {
+    if (decisionsData) {
+      setDecisions(decisionsData.data);
+    }
+  }, [decisionsData]);
 
   const updateDecisions =
     trpcReact.projectsRouter.updateProjectDecisions.useMutation({
@@ -118,37 +137,6 @@ useEffect(() => {
     }
   }, [fetchedMessages, selectedProject]);
 
-  // if (projectFetchingError) {
-  //   return (
-  //     <View
-  //       style={{
-  //         flex: 1,
-  //         justifyContent: "center",
-  //         alignItems: "center",
-  //         backgroundColor: "black",
-  //       }}
-  //     >
-  //       <Text style={{ color: "white" }}>Error fetching project</Text>
-  //     </View>
-  //   );
-  // }
-
-  // if (isFetching) {
-  //   return (
-  //     <View
-  //       style={{
-  //         flex: 1,
-  //         justifyContent: "center",
-  //         alignItems: "center",
-  //         backgroundColor: "black",
-  //       }}
-  //     >
-  //       <ActivityIndicator size="large" color="white" />
-  //       <Text style={{ color: "white" }}>Loading...</Text>
-  //     </View>
-  //   );
-  // }
-
   const handleSheetChanges = useCallback((index: number) => {
     console.log("Bottom sheet index:", index);
     setIsSheetOpen(index !== -1);
@@ -187,7 +175,9 @@ useEffect(() => {
   );
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [context, setContext] = useState<string>("");
+  const [customContext, setCustomContext] = useState(
+    project?.customContext || ""
+  );
 
   const [inputText, setInputText] = useState("");
   const scrollViewRef = useRef<ScrollView>(null);
@@ -232,7 +222,6 @@ useEffect(() => {
         scrollToBottom();
 
         try {
-
           eventSourceRef.current = new EventSource(
             `${SERVER_URL}/api/ai-response`,
             {
@@ -451,6 +440,27 @@ useEffect(() => {
     );
   };
 
+  const updateProject = async () => {
+
+    console.log({
+      createdBy: project?.createdBy || "",
+      id: project?.id || "",
+      name: project?.name || "",
+      description: project?.description || "",
+      details: project?.details || undefined,
+      customContext: customContext.trim(),
+    })
+
+    updateProjectData.mutate({
+      createdBy: project?.createdBy || "",
+      id: project?.id || "",
+      name: project?.name || "",
+      description: project?.description || "",
+      details: project?.details || undefined,
+      customContext: customContext.trim(),
+    });
+  };
+
   return (
     <>
       <StatusBar barStyle="light-content" backgroundColor="#000000" />
@@ -609,11 +619,12 @@ useEffect(() => {
                   style={styles.input}
                   placeholder="Enter your own context"
                   placeholderTextColor="#666666"
-                  value={project?.customContext || ''}
+                  value={customContext}
+                  onChangeText={setCustomContext}
                   multiline
                 />
               </View>
-              {context && (
+              {customContext && (
                 <TouchableOpacity
                   style={{
                     backgroundColor: "black",
@@ -627,6 +638,7 @@ useEffect(() => {
                     alignItems: "center",
                     justifyContent: "center",
                   }}
+                  onPress={() => updateProject()}
                 >
                   <Text style={{ color: "white" }}>Update</Text>
                 </TouchableOpacity>
@@ -693,7 +705,7 @@ useEffect(() => {
                 decisionsError,
                 projectName: project.name,
                 projectId: project.id,
-                decisionRefetch
+                decisionRefetch,
               }}
             />
           </BottomSheet>

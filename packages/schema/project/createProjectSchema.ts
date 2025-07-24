@@ -34,7 +34,7 @@ export const projectSchema = z.object({
       timeline: z.string().optional(),
     })
     .optional(),
-  customContext: z.string().max(300).optional(),
+  customContext: z.string().max(300),
 });
 
 export const createMessageSchema = z.object({

@@ -42,6 +42,7 @@ export default function DecisionsSheet({
   const [expanded, setExpanded] = useState<{ [key: string]: boolean }>({});
 
   const utils = trpcReact.useUtils();
+  utils.projectsRouter.getDecisions.refetch({ projectId });
 
   const toggleExpand = (id: string) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -51,7 +52,6 @@ export default function DecisionsSheet({
     }));
   };
 
-  utils.projectsRouter.getDecisions.refetch({ projectId });
 
   if (decisionsError) {
     return (

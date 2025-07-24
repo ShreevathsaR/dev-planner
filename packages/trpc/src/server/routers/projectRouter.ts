@@ -304,10 +304,10 @@ export const projectRouter = trouter({
     }),
   updateProject: protectedProcedure
     .input(projectSchema)
-    .mutation(({ input }) => {
+    .mutation(async ({ input }) => {
       const { id } = input;
 
-      const updatedProject = prisma.project.update({
+      const updatedProject = await prisma.project.update({
         where: {
           id,
         },
