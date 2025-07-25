@@ -31,18 +31,14 @@ const SidebarComponent = () => {
   const setSelectedProject = useProjectStore(
     (state) => state.setSelectedProject
   );
-
+  const resetStore = useProjectStore(state => state.resetStore)
   // console.log("Current User:", user);
   console.log("Projects", projects);
 
   const router = useRouter();
 
   const handleSignOut = async () => {
-    console.log("Signing out");
-    setUser(null);
-    await signOut(auth);
-    await deleteCookie();
-    router.push("/sign-in");
+    router.push("/sign-out");
   };
 
   const handleSelectProject = (project: Project) => {
