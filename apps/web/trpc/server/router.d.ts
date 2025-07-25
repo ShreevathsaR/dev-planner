@@ -188,6 +188,14 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
             };
             meta: object;
         }>;
+        deleteDecision: import("@trpc/server").TRPCMutationProcedure<{
+            input: string;
+            output: {
+                success: boolean;
+                message: string;
+            };
+            meta: object;
+        }>;
         testProject: import("@trpc/server").TRPCQueryProcedure<{
             input: void;
             output: string;

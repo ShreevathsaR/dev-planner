@@ -32,27 +32,30 @@ import {
 import { setSession } from "@/lib/setSession";
 import { trpcReact } from "../../../../trpc";
 import { handleGoogleSignIn } from "@/lib/services/googleSignIn";
+import { useUserStore } from "@/lib/context/userStore";
 
 export default function Signin() {
   const [isLoading, setIsLoading] = useState(false);
   const [token, setToken] = useState("");
   const router = useRouter();
-  const {data, error} = trpcReact.projectsRouter.testProject.useQuery();
-  console.log('trpc', data, error)
+
+  const setUser = useUserStore((state) => state.setUser);
 
   const registerUserMutation = trpcReact.user.registerUser.useMutation({
     onSuccess: async () => {
       await setSession(token);
-      router.replace("/dashboard");
+      setUser(auth.currentUser);
+      router.replace("/home");
       setIsLoading(false);
       return toast.success("Logged-in successfully");
     },
     onError: async (error) => {
-      console.log(error)
-      console.log(error.data)
+      console.log(error);
+      console.log(error.data);
       if (error.data?.code === "CONFLICT") {
         await setSession(token);
-        router.replace("/dashboard");
+        setUser(auth.currentUser);
+        router.replace("/home");
         setIsLoading(false);
         return toast.success("Logged-in successfully");
       }
@@ -96,8 +99,7 @@ export default function Signin() {
       const token = await response.user.getIdToken();
       await setSession(token);
 
-      //TODO:Save user details in context
-      router.replace("dashboard");
+      router.replace("home");
       return toast.success("User logged-in successfully");
     } catch (error: any) {
       let errorMessage = error.code;
@@ -123,22 +125,24 @@ export default function Signin() {
   }
 
   return (
-    <div className="flex bg-foreground flex-col min-h-screen justify-center gap-6">
+    <div className="flex w-full bg-background flex-col min-h-screen justify-center gap-6">
       <Card className="w-100 self-center bg-secondary-background border-white/20 border-1">
         <CardHeader className="text-center">
-          <CardTitle className="text-xl text-accent">Welcome</CardTitle>
+          <CardTitle className="text-xl text-white/80">Welcome</CardTitle>
           <CardDescription>Login with your email and password</CardDescription>
         </CardHeader>
         <CardContent>
           <Button
             disabled={isLoading}
-            onClick={() => handleGoogleSignIn({
-              registerUserMutation,
-              setIsLoading,
-              setToken,
-            })}
+            onClick={() =>
+              handleGoogleSignIn({
+                registerUserMutation,
+                setIsLoading,
+                setToken,
+              })
+            }
             variant="outline"
-            className="w-full mb-5 text-accent bg-black border-white/15 hover:bg-white/15 hover:cursor-pointer hover:text-accent"
+            className="w-full mb-5 text-white/90 bg-black border-white/15 hover:bg-white/15 hover:cursor-pointer hover:text-accent-foreground"
           >
             {isLoading ? (
               <Loader2 className="animate-spin" />
@@ -153,7 +157,7 @@ export default function Signin() {
             {isLoading ? "Please wait..." : "Login with Google"}
           </Button>
           <div className="after:border-white/20 mb-5 relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
-            <span className="bg-foreground text-accent relative z-10 px-2">
+            <span className="bg-background text-accent-foreground relative z-10 px-2">
               Or continue with
             </span>
           </div>
@@ -167,10 +171,12 @@ export default function Signin() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-accent">Email</FormLabel>
+                    <FormLabel className="text-accent-foreground">
+                      Email
+                    </FormLabel>
                     <FormControl>
                       <Input
-                        className="border-white/15 text-accent focus:!border-white/35 focus:border"
+                        className="border-white/15 text-accent-foreground focus:!border-white/35 focus:border"
                         placeholder="Enter your email"
                         {...field}
                       />
@@ -184,10 +190,12 @@ export default function Signin() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-accent">Password</FormLabel>
+                    <FormLabel className="text-accent-foreground">
+                      Password
+                    </FormLabel>
                     <FormControl>
                       <Input
-                        className="border-white/15 text-accent focus:!border-white/35 focus:border"
+                        className="border-white/15 text-accent-foreground focus:!border-white/35 focus:border"
                         type="password"
                         placeholder="Enter your password"
                         {...field}
@@ -200,7 +208,7 @@ export default function Signin() {
               <Button
                 disabled={isLoading}
                 type="submit"
-                className="w-30 self-center bg-background hover:bg-accent text-black hover:cursor-pointer"
+                className="w-30 self-center bg-foreground hover:bg-accent hover:text-white text-black hover:cursor-pointer"
               >
                 {isLoading ? (
                   <>
@@ -215,9 +223,9 @@ export default function Signin() {
           </Form>
         </CardContent>
       </Card>
-      <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
+      <div className="text-muted-background *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
         Not registered with us? Please{" "}
-        <a href="/sign-up" className="hover:!text-accent">
+        <a href="/sign-up" className="hover:!text-accent-foreground">
           Sign up
         </a>
         .

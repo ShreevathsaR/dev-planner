@@ -19,7 +19,6 @@ export const handleGoogleSignIn = async ({
   try {
     const response = await signInWithPopup(auth, provider);
 
-    console.log("User", response.user);
     const { uid, displayName, photoURL, email } = response.user;
 
     if (!uid || !displayName || !photoURL || !email) {
@@ -28,12 +27,10 @@ export const handleGoogleSignIn = async ({
     }
 
     const credential = GoogleAuthProvider.credentialFromResult(response);
-    console.log("AccessToken", credential?.accessToken);
 
     const token = await response.user.getIdToken();
     setToken(token);
 
-    console.log('sending this', {email, uid, photoURL, displayName})
 
     registerUserMutation.mutate({
       email,
@@ -58,10 +55,9 @@ export const handleGoogleSignIn = async ({
           break;
       }
     }
+    setIsLoading(false);
     toast.error("Error signing", {
       description: errorMessage,
     });
-  } finally {
-    setIsLoading(false);
   }
 };

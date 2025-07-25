@@ -6,6 +6,7 @@ import { redis } from "../../../../trpc/server";
 
 const AIRequestSchema = z.object({
   message: z.string().min(1, "Message is required"),
+  customContext: z.string().optional(),
   project: z.object({
     name: z.string().min(1, "Project name is required"),
     id: z.string().min(1, "Project ID is required"),
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const { project, message, messageHistory, previousDecisions } =
+  const { project, message, messageHistory, previousDecisions, customContext } =
     parseResult.data;
   const redisKey = project.id;
 
@@ -80,7 +81,8 @@ export async function POST(request: NextRequest) {
 5. Ask questions when needed more information is needed
 
 ### **Current Project Context**  
-- **Type**: ${project.description}  
+- **Type**: ${project.description}
+- **Custom Context**: ${customContext || "No custom context provided"}
 - **Constraints**: ${`team size: ${project.details.teamSize}, budget: ${
               project.details.budget
             }, timeline: ${project.details.timeline}, skills: ${String(
@@ -95,15 +97,15 @@ ${message}
 YOUR RESPONSE FORMAT:
 ### **Response**(As already instructed)
 
-### **Decisions**(MUST INCLUDE AT THE END OF YOUR RESPONSE):
+### **Decisions**(MUST INCLUDE AT THE END OF YOUR RESPONSE ONLY FILL TECH STACKS AND ARCHITECTURAL DECISIONS):
 This section will contain a list of decisions made by you in the following format. Each decision will have the following structure put all decisions in a JSON array.
 - {
   "category": "technology_category(like frontend, backend, database, architecture etc.)",
-  "key": "decision_key",
-  "value": "decision_value",
-  "reason": "reason_for_decision",
-  "confidence_score: "0 to 1",
-  "recommendation": "recommendation_for_decision"
+  "key": "decision_key" of type string,
+  "value": "decision_value" of type string (DO NOT GIVE 'true' 'false' 'yes' 'no' NAME THE TECHSTACK),
+  "reason": "reason_for_decision" of type string,
+  "confidence_score: "0 to 1" of type number,
+  "recommendation": "recommendation_for_decision" of type string
 }
 
 ### **Rules**  

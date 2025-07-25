@@ -10,11 +10,21 @@ export const trpc = trpcReact.createClient({
     httpLink({
       url: `/api/trpc`,
       async headers() {
-        const token = await auth.currentUser?.getIdToken();
-        return token ? {
-          Authorization: `Bearer ${token}`
-        } : {}
-      }
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json", 
+        };
+
+        if (auth.currentUser && auth.currentUser.emailVerified) {
+          try {
+            const token = await auth.currentUser.getIdToken();
+            headers["Authorization"] = `Bearer ${token}`;
+          } catch (error) {
+            console.log("Failed to get token:", error);
+          }
+        }
+
+        return headers;
+      },
     }),
   ],
 });

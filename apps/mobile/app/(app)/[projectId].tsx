@@ -35,7 +35,6 @@ import { trpcReact } from "../../trpc";
 import { useProjectMessages } from "@/hooks/useProjectMessages";
 import DecisionsSheet from "@/components/DecisionsSheet";
 import Toast from "react-native-toast-message";
-
 const { width } = Dimensions.get("window");
 
 const SERVER_URL = process.env.EXPO_PUBLIC_BASE_URL;
@@ -122,7 +121,7 @@ export default function Project() {
 
         contentWithoutDecisions = contentWithoutDecisions
           .split("\n")
-          .filter((line) => !line.trim().startsWith("### **Response**"))
+          .filter((line: string) => !line.trim().startsWith("### **Response**"))
           .join("\n")
           .trim();
 
@@ -229,6 +228,7 @@ export default function Project() {
         try {
           eventSourceRef.current = new EventSource(
             `${SERVER_URL}/api/ai-response`,
+            // `http://192.168.1.105:3000/api/ai-response`,
             {
               method: "POST",
               headers: {
@@ -237,6 +237,7 @@ export default function Project() {
               body: JSON.stringify({
                 message: currentMessage.content,
                 project,
+                customContext,
                 messageHistory: messages
                   .filter((message) => message.role === "user")
                   .sort(

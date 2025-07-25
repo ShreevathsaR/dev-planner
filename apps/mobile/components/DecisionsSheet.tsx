@@ -52,6 +52,11 @@ export default function DecisionsSheet({
     }));
   };
 
+  const deleteDecision = async (decisionId: string) => {
+    //TODO
+    //A trpc procedure to delete a single decision
+    console.groupCollapsed(decisionId)
+  }
 
   if (decisionsError) {
     return (
@@ -92,34 +97,62 @@ export default function DecisionsSheet({
           const isExpanded = expanded[decision.id];
           return (
             <View key={decision.id}>
-              <TouchableOpacity
-                onPress={() => toggleExpand(decision.id)}
-                style={[
-                  styles.decisionContainer,
-                  isExpanded && styles.decisionContainerExpanded,
-                ]}
+              <View
+                style={{
+                  flexDirection: "row",
+                  flex: 1,
+                  width: "100%",
+                  alignItems: "flex-start",
+                  justifyContent: "space-between",
+                }}
               >
-                <View>
-                  <Text style={styles.decisionKey}>
-                    {decision.key
-                      .replace(/_/g, " ")
-                      .split(" ")
-                      .map(
-                        (word) =>
-                          word.charAt(0).toUpperCase() +
-                          word.slice(1).toLowerCase()
-                      )
-                      .join(" ")}
-                  </Text>
-                  <Text style={styles.decisionValue}>{decision.value}</Text>
-                </View>
-                <Feather
-                  name={isExpanded ? "chevron-up" : "chevron-down"}
-                  size={20}
-                  color="white"
-                />
-              </TouchableOpacity>
-
+                <TouchableOpacity
+                  onPress={() => toggleExpand(decision.id)}
+                  style={[
+                    styles.decisionContainer,
+                    isExpanded && styles.decisionContainerExpanded,
+                  ]}
+                >
+                  <View>
+                    <Text style={styles.decisionKey}>
+                      {decision.key
+                        .replace(/_/g, " ")
+                        .split(" ")
+                        .map(
+                          (word) =>
+                            word.charAt(0).toUpperCase() +
+                            word.slice(1).toLowerCase()
+                        )
+                        .join(" ")}
+                    </Text>
+                    <Text style={styles.decisionValue}>{decision.value}</Text>
+                  </View>
+                  <Feather
+                    name={isExpanded ? "chevron-up" : "chevron-down"}
+                    size={20}
+                    color="white"
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={{
+                    padding: 6,
+                    backgroundColor: "lightcoral",
+                    borderRadius: 2,
+                    justifyContent:"center",
+                    flex: 1,
+                    height: "100%"
+                  }}
+                >
+                  <Feather
+                    name="delete"
+                    size={16}
+                    color="white"
+                    onPress={() => {
+                      deleteDecision(decision.id)
+                    }}
+                  />
+                </TouchableOpacity>
+              </View>
               {isExpanded && (
                 <View style={styles.decisionReason}>
                   <Text style={styles.reasonText}>
@@ -200,6 +233,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 7,
     minHeight: 60,
+    width: "90%",
   },
   decisionContainerExpanded: {
     borderBottomLeftRadius: 0,
@@ -220,6 +254,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 20,
     paddingTop: 10,
+    width: "90%",
     borderBottomLeftRadius: 7,
     borderBottomRightRadius: 7,
   },
