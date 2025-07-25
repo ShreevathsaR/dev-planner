@@ -8,16 +8,9 @@ import {
   SidebarGroupContent,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarTrigger,
 } from "./ui/sidebar";
 import {
-  Calendar,
-  Home,
-  Inbox,
   LogOut,
-  Plus,
-  Search,
-  Settings,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { auth } from "@/lib/firebase";

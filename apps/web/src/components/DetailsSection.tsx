@@ -1,6 +1,4 @@
 "use client";
-import { useProjectStore } from "@/lib/context/projectStore";
-import { ChevronDown, ChevronUp } from "lucide-react";
 import React, { useState } from "react";
 import ContextCard from "./ContextCard";
 import DecisionsCard from "./DecisionsCard";

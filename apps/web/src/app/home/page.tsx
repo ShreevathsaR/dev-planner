@@ -1,5 +1,4 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import SidebarComponent from "@/components/Sidebar";
 import ChatInterface from "@/components/ChatInterface";
@@ -11,7 +10,7 @@ import { Plus } from "lucide-react";
 import DetailsSection from "@/components/DetailsSection";
 
 const Page = () => {
-  const { data: projectsData, error, isFetching } = getProjects();
+  const { data: projectsData, isFetching } = getProjects();
   const user = useUserStore((state) => state.user);
   const setProjects = useProjectStore((state) => state.setProjects);
   const setSelectedProject = useProjectStore((state) => state.setSelectedProject)

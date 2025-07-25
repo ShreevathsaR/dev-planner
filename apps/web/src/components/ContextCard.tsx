@@ -1,10 +1,9 @@
 import { useProjectStore } from "@/lib/context/projectStore";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { toast } from "sonner";
 import { trpcReact } from "../../trpc/client";
 import { Button } from "./ui/button";
-import { Project } from "@/lib/types";
 
 const ContextCard = ({
   isContextExpanded,

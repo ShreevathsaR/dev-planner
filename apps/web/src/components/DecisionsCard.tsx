@@ -1,6 +1,6 @@
 import { useProjectStore } from "@/lib/context/projectStore";
 import { getDecisions } from "@/lib/services/getDecisions";
-import { ChevronDown, ChevronUp, Delete, Trash } from "lucide-react";
+import { ChevronDown, ChevronUp, Trash } from "lucide-react";
 import React, { useState } from "react";
 import { Skeleton } from "./ui/skeleton";
 import { deleteDecision } from "@/lib/services/deleteDecision";
@@ -17,9 +17,7 @@ const DecisionsCard = ({
   setIsDecisionsExpanded: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const selectedProject = useProjectStore((state) => state.selectedProject);
-  const [customContext, setCustomContext] = useState(
-    selectedProject?.customContext || ""
-  );
+
   const [showReason, setShowReason] = useState<{ [key: string]: boolean }>({});
 
   const { data: decisions, isFetching, refetch: decisionsRefetch} = getDecisions(selectedProject?.id);

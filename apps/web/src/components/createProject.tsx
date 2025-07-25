@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -95,7 +94,7 @@ const CreateProjectModal = () => {
           <DialogTitle>Create New Project</DialogTitle>
           <DialogDescription>
             Fill in the details below to create a new project. Click save when
-            you're done.
+            you&apos;re done.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
