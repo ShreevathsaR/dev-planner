@@ -62,7 +62,7 @@ export default function LandingPage() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-black/90 to-black relative overflow-hidden">
+    <div className="min-h-screen w-full bg-gradient-to-br from-black via-black/90 to-black relative overflow-hidden">
       {/* Animated gradient background */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent)] animate-pulse" />
       
