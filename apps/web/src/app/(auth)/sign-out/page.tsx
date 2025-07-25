@@ -7,7 +7,7 @@ import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 
-const page = () => {
+const SignoutPage = () => {
   const setUser = useUserStore((state) => state.setUser);
   const resetStore = useProjectStore((state) => state.resetStore);
   const setSelectedProject = useProjectStore((state) => state.setSelectedProject)
@@ -29,4 +29,4 @@ const page = () => {
   return <div className="bg-black"></div>;
 };
 
-export default page;
+export default SignoutPage;

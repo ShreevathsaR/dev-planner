@@ -2,7 +2,6 @@
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import SidebarComponent from "@/components/Sidebar";
 import ChatInterface from "@/components/ChatInterface";
-import { getProjects } from "@/lib/services/getProjects";
 import { useEffect } from "react";
 import { useProjectStore } from "@/lib/context/projectStore";
 import { useUserStore } from "@/lib/context/userStore";

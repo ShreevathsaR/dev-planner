@@ -13,9 +13,6 @@ import {
   LogOut,
 } from "lucide-react";
 import { Button } from "./ui/button";
-import { auth } from "@/lib/firebase";
-import { signOut } from "firebase/auth";
-import { deleteCookie } from "@/lib/setSession";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/lib/context/userStore";
 import Image from "next/image";
@@ -24,14 +21,12 @@ import { Project } from "@/lib/types";
 import CreateProjectModal from "./createProject";
 
 const SidebarComponent = () => {
-  const setUser = useUserStore((state) => state.setUser);
   const user = useUserStore((state) => state.user);
   const projects = useProjectStore((state) => state.projects);
   const selectedProject = useProjectStore((state) => state.selectedProject);
   const setSelectedProject = useProjectStore(
     (state) => state.setSelectedProject
   );
-  const resetStore = useProjectStore(state => state.resetStore)
   // console.log("Current User:", user);
   console.log("Projects", projects);
 
