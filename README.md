@@ -52,7 +52,14 @@ PlanDev is a cross-platform AI assistant that helps developers plan and architec
 ![Web UI](./assets/web-ui.png)
 
 ### 📱 Mobile App – AI Chat + Decision Rendering
-![Mobile UI](./assets/mobile-ui-1.jpg)(./assets/mobile-ui-2.jpg)(./assets/mobile-ui-3.jpg)(./assets/mobile-ui-4.jpg)
+
+<div align="center">
+  <img src="./assets/mobile-ui-1.jpg" alt="Chat Screen" width="200"/>
+  <img src="./assets/mobile-ui-2.jpg" alt="Decisions View" width="200"/>
+  <img src="./assets/mobile-ui-3.jpg" alt="Project Context" width="200"/>
+  <img src="./assets/mobile-ui-4.jpg" alt="Project Switcher" width="200"/>
+</div>
+
 ---
 
 ## 🔧 Project Structure
