@@ -20,14 +20,9 @@ import {
 import { TextInput } from "react-native-gesture-handler";
 import Icon from "@expo/vector-icons/Feather";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  Stack,
-  useLocalSearchParams,
-} from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { useProjectsStore } from "@/lib/context/userStore";
-import BottomSheet, {
-  BottomSheetScrollView,
-} from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import Feather from "@expo/vector-icons/Feather";
 import EventSource from "react-native-sse";
 import { ChatMessage, Decision, DecisionType } from "@/lib/types";
@@ -35,6 +30,8 @@ import { trpcReact } from "../../trpc";
 import { useProjectMessages } from "@/hooks/useProjectMessages";
 import DecisionsSheet from "@/components/DecisionsSheet";
 import Toast from "react-native-toast-message";
+import Markdown from "react-native-markdown-display";
+import { mkParserStyles } from "@/lib/mkParserStyles";
 const { width } = Dimensions.get("window");
 
 const SERVER_URL = process.env.EXPO_PUBLIC_BASE_URL;
@@ -64,7 +61,7 @@ export default function Project() {
       await utils.projectsRouter.getProjects.refetch();
       setCustomContext(data.customContext);
     },
-    onError: ({data, message}) => {
+    onError: ({ data, message }) => {
       console.error("Failed to update context:", data, message);
       Toast.show({
         type: "error",
@@ -426,6 +423,15 @@ export default function Project() {
     });
   };
 
+  const suggestions = [
+    "Help me plan the initial project structure",
+    "What technology stack should I use?",
+    "What should be my MVP scope?",
+    "How should I handle authentication?",
+    "Suggest database schema design",
+    "What API endpoints will I need?",
+  ];
+
   const stopStreaming = () => {
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
@@ -447,7 +453,6 @@ export default function Project() {
   };
 
   const updateProject = async () => {
-
     console.log({
       createdBy: project?.createdBy || "",
       id: project?.id || "",
@@ -455,7 +460,7 @@ export default function Project() {
       description: project?.description || "",
       details: project?.details || undefined,
       customContext: customContext.trim(),
-    })
+    });
 
     updateProjectData.mutate({
       createdBy: project?.createdBy || "",
@@ -511,42 +516,67 @@ export default function Project() {
               scrollViewRef.current?.scrollToEnd({ animated: true })
             }
           >
-            {messages.map((message) => (
-              <View
-                key={message.id}
-                style={[
-                  styles.messageWrapper,
-                  message.role == "user"
-                    ? styles.userMessageWrapper
-                    : styles.aiMessageWrapper,
-                ]}
-              >
+            {messages.length > 0 ? (
+              messages.map((message) => (
                 <View
+                  key={message.id}
                   style={[
-                    styles.messageBubble,
+                    styles.messageWrapper,
                     message.role == "user"
-                      ? styles.userBubble
-                      : styles.aiBubble,
+                      ? styles.userMessageWrapper
+                      : styles.aiMessageWrapper,
                   ]}
                 >
-                  <Text
+                  <View
                     style={[
-                      styles.messageText,
+                      styles.messageBubble,
                       message.role == "user"
-                        ? styles.userMessageText
-                        : styles.aiMessageText,
+                        ? styles.userBubble
+                        : styles.aiBubble,
                     ]}
                   >
-                    {message.content}
-                  </Text>
-                  {message.isStreaming && (
-                    <View style={styles.streamingIndicator}>
-                      <Text style={styles.streamingText}>●</Text>
-                    </View>
-                  )}
+                    <Text
+                      style={[
+                        styles.messageText,
+                        message.role == "user"
+                          ? styles.userMessageText
+                          : styles.aiMessageText,
+                      ]}
+                    >
+                      <Markdown style={{...mkParserStyles, text:{color: message.role == "user" ? "black" : "white"} }}>{message.content}</Markdown>
+                    </Text>
+                    {message.isStreaming && (
+                      <View style={styles.streamingIndicator}>
+                        <Text style={styles.streamingText}>●</Text>
+                      </View>
+                    )}
+                  </View>
                 </View>
-              </View>
-            ))}
+              ))
+            ) : (
+              <ScrollView contentContainerStyle={styles.noMessagesContainer}>
+                <View style={styles.messageBox}>
+                  <Text style={styles.subtitle}>
+                    No messages yet. Start chatting!
+                  </Text>
+                  <Text style={styles.noMessagesText}>
+                    Ask anything about your project, and I will try to help you.
+                  </Text>
+                </View>
+
+                <View style={styles.suggestionContainer}>
+                  {suggestions.map((example, idx) => (
+                    <TouchableOpacity
+                      key={idx}
+                      style={styles.suggestionBox}
+                      onPress={() => setInputText(example)}
+                    >
+                      <Text style={styles.suggestionText}>{example}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
+            )}
           </ScrollView>
 
           <View
@@ -726,6 +756,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#000000",
   },
+  noMessagesContainer: {
+    flex: 1,
+    backgroundColor: "#000000",
+    justifyContent: "center",
+  },
   keyboardAvoidingView: {
     flex: 1,
   },
@@ -749,6 +784,11 @@ const styles = StyleSheet.create({
   userMessageWrapper: {
     alignItems: "flex-end",
   },
+  subtitle: {
+    marginBottom: 8,
+    color: "#888",
+    fontSize: 16,
+  },
   aiMessageWrapper: {
     alignItems: "flex-start",
   },
@@ -767,6 +807,33 @@ const styles = StyleSheet.create({
     elevation: 2,
     position: "relative",
   },
+  messageBox: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  suggestionContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 12, // for newer React Native versions or use margin manually
+  },
+  suggestionBox: {
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    margin: 6,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  suggestionText: {
+    fontSize: 14,
+    color: "#ffffff",
+  },
   userBubble: {
     backgroundColor: "#FFFFFF",
     borderBottomRightRadius: 6,
@@ -782,6 +849,15 @@ const styles = StyleSheet.create({
   messageText: {
     fontSize: 16,
     lineHeight: 22,
+    color: "white",
+    // textAlign: "center",
+    fontWeight: "400",
+  },
+  noMessagesText: {
+    fontSize: 16,
+    lineHeight: 22,
+    color: "white",
+    textAlign: "center",
     fontWeight: "400",
   },
   userMessageText: {

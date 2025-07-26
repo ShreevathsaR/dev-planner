@@ -8,11 +8,12 @@ import {
   Platform,
   UIManager,
 } from "react-native";
-import React, { useEffect, useLayoutEffect, useState } from "react";
-import { BottomSheetScrollView, BottomSheetView } from "@gorhom/bottom-sheet";
+import React, { useState } from "react";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import Feather from "@expo/vector-icons/Feather";
 import { trpcReact } from "@/trpc";
 import { Decision } from "@/lib/types";
+import { deleteDecisionService } from "@/lib/deleteDecision";
 
 if (Platform.OS === "android") {
   UIManager.setLayoutAnimationEnabledExperimental?.(true);
@@ -44,6 +45,7 @@ export default function DecisionsSheet({
   const utils = trpcReact.useUtils();
   utils.projectsRouter.getDecisions.refetch({ projectId });
 
+  const deleteDecisionMutation = deleteDecisionService(projectId);
   const toggleExpand = (id: string) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpanded((prev) => ({
@@ -53,10 +55,8 @@ export default function DecisionsSheet({
   };
 
   const deleteDecision = async (decisionId: string) => {
-    //TODO
-    //A trpc procedure to delete a single decision
-    console.groupCollapsed(decisionId)
-  }
+    deleteDecisionMutation.mutate(decisionId);
+  };
 
   if (decisionsError) {
     return (
@@ -138,9 +138,9 @@ export default function DecisionsSheet({
                     padding: 6,
                     backgroundColor: "lightcoral",
                     borderRadius: 2,
-                    justifyContent:"center",
+                    justifyContent: "center",
                     flex: 1,
-                    height: "100%"
+                    height: "100%",
                   }}
                 >
                   <Feather
@@ -148,7 +148,7 @@ export default function DecisionsSheet({
                     size={16}
                     color="white"
                     onPress={() => {
-                      deleteDecision(decision.id)
+                      deleteDecision(decision.id);
                     }}
                   />
                 </TouchableOpacity>

@@ -3,6 +3,7 @@ import { TRPCError, protectedProcedure, trouter } from "../trpc";
 import { createProjectSchema, createMessageSchema, projectSchema, } from "@dev-planner/schema";
 import * as z from "zod";
 import { redis } from "../redisClient";
+import { error } from "console";
 export const projectRouter = trouter({
     createProject: protectedProcedure
         .input(createProjectSchema)
@@ -282,6 +283,33 @@ export const projectRouter = trouter({
             message: "Project updated successfully",
             data: updatedProject,
         };
+    }),
+    deleteDecision: protectedProcedure
+        .input((decisionId) => {
+        if (typeof decisionId !== "string") {
+            throw error("Received decision Id is not a string");
+        }
+        return decisionId;
+    })
+        .mutation(async ({ input }) => {
+        try {
+            await prisma.decision.delete({
+                where: {
+                    id: input,
+                },
+            });
+            return {
+                success: true,
+                message: "Decision deleted successfully",
+            };
+        }
+        catch (error) {
+            throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Failed to delete decision",
+                cause: error,
+            });
+        }
     }),
     testProject: protectedProcedure.query(({ ctx }) => {
         return `Hello ${ctx.user?.email}`;
